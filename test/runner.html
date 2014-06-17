@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>xpath-range tests</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/node_modules/mocha/mocha.css">
+  </head>
+  <body>
+    <div id="fixtures" style="display: none"></div>
+    <div id="mocha"></div>
+
+    <script src="/lib/vendor/jquery.js"></script><!-- provided dynamically -->
+    <!--[if lt IE 9]>
+    <script src="/lib/vendor/json2.js"></script>
+    <![endif]-->
+    <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/node_modules/chai/chai.js"></script>
+    <script src="/node_modules/sinon/pkg/sinon.js"></script>
+    <script>
+      // Use mocha's BDD interface
+      mocha.setup('bdd');
+
+      // And chai.js assert
+      var assert = chai.assert;
+    </script>
+
+    <script src="/lib/index.js"></script>
+    <script src="/test/helpers.js"></script>
+
+    <script src="/test/spec/util_spec.js"></script>
+    <script src="/test/spec/range_spec.js"></script>
+    <script src="/test/spec/xpath_spec.js"></script>
+
+    <script>
+      if (window.mochaPhantomJS) {
+        mochaPhantomJS.run();
+      } else if (window.__testlingConsole) {
+        mocha.reporter('tap');
+        mocha.run();
+      } else {
+        mocha.run();
+      }
+    </script>
+  </body>
+</html>

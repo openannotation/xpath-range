@@ -1,0 +1,41 @@
+{
+  "name": "xpath-range",
+  "version": "0.0.3",
+  "description": "A (Browser) Range implementation / wrapper with XPath features, extracted from Annotator",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "./tools/lint && ./tools/test",
+    "start": "./tools/serve",
+    "prepublish": "coffee -o lib src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openannotation/xpath-range.git"
+  },
+  "author": "",
+  "license": "MIT + GPL-3.0+ Dual License",
+  "bugs": {
+    "url": "https://github.com/openannotation/xpath-range/issues"
+  },
+  "homepage": "https://github.com/openannotation/xpath-range",
+  "dependencies": {
+    "jquery": "~1.11.0"
+  },
+  "devDependencies": {
+    "browserify": "^4.1.10",
+    "coffee-script": "^1.7.1",
+    "coffeeify": "^0.6.0",
+    "coffeelint": "~1.1.0",
+    "connect": "~2.10.1",
+    "convert-source-map": "~0.3.1",
+    "glob": "3.2.9",
+    "kew": "~0.2.2",
+    "mocha": "~1.12.1",
+    "mocha-phantomjs": "~3.3.2",
+    "chai": "~1.7.2",
+    "sinon": "~1.6.0",
+    "source-map": "~0.1.32",
+    "through": "~2.3.4",
+    "watchify": "^0.10.2"
+  }
+}

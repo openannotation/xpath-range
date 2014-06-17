@@ -1,8 +1,6 @@
 xpath = require('./xpath')
 Util = require('./util')
-$ = Util.$
-_t = Util.TranslationString
-
+$ = require('jquery')
 
 Range = {}
 
@@ -26,7 +24,7 @@ Range.sniff = (r) ->
   else if r.start and typeof r.start is "object"
     new Range.NormalizedRange(r)
   else
-    console.error(_t("Could not sniff range type"))
+    console.error("Could not sniff range type") # TODO: i18n
     false
 
 class Range.RangeError extends Error
@@ -62,7 +60,8 @@ class Range.BrowserRange
   # Returns an instance of Range.NormalizedRange
   normalize: (root) ->
     if @tainted
-      console.error(_t("You may only call normalize() once on a BrowserRange!"))
+      console.error("You may only call normalize() once on a BrowserRange!")
+      #i18n
       return false
     else
       @tainted = true

@@ -1,4 +1,5 @@
-$ = require('./util').$
+$ = require('jquery')
+Util = require('./util')
 
 evaluateXPath = (xp, root = document, nsResolver = null) ->
   try

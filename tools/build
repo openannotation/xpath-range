@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+var child_process = require('child_process');
+var fs = require('fs');
+var path = require('path');
+
+var coffee = require('coffee-script');
+var coffeeify = require('coffeeify');
+var convert = require('convert-source-map');
+var glob = require('glob');
+var sourceMap = require('source-map');
+var through = require('through');
+
+var SourceMapConsumer = sourceMap.SourceMapConsumer;
+var SourceMapGenerator = sourceMap.SourceMapGenerator;
+var SourceNode = sourceMap.SourceNode;
+
+// Convenience browserify factory for coffee
+exports.browserify = function (opts) {
+  if (!opts) opts = {};
+  if (Array.isArray(opts)) opts = {entries: opts}
+  if (typeof(opts) === 'string') opts = {entries: [opts]}
+  if (!opts.extensions) opts.extensions = [];
+  opts.extensions.push('.coffee');
+  return require('browserify')(opts).transform(coffeeify);
+};
+
+
+// Package the bundles when called as the main script
+if (require.main === module) {
+  var depsOnly = false;
+  var libs = {};
+  var targets = Array.prototype.slice.call(process.argv, 2);
+
+  while(targets.length) {
+    var target = targets.shift();
+
+    switch (target) {
+    case '-d':
+      depsOnly = true;
+      break;
+    case 'annotator':
+      core();
+      break;
+    case '-p':
+      plugin(targets.shift());
+      break;
+    case 'bootstrap':
+      bootstrap();
+      break;
+    case undefined:
+      return;
+    default:
+      console.error('Unrecognized target:', target);
+      process.exit(64);
+      break;
+    }
+  }
+
+  function write(filename, node) {
+    if (depsOnly) return process.stdout.write(node);
+    node.prepend(preamble);
+
+    // Output the source with the preamble appended
+    var output = node.toStringWithSourceMap({file: filename});
+    console.log('Writing', filename);
+    fs.writeFileSync(filename, [
+      output.code,
+      convert.fromJSON(output.map.toString()).toComment()
+    ].join('\n'));
+
+    return node;
+  }
+
+  function core () {
+    pack(exports.browserify('./src/annotator'), 'pkg/annotator.js', {
+      debug: true,
+      standalone: 'Annotator'
+    });
+  }
+
+  function bootstrap() {
+    pack(exports.browserify('./src/bootstrap'), 'pkg/bootstrap.js', {
+      debug: true
+    });
+  }
+
+  function pack(b, filename, options) {
+    var deps = '';
+
+    if (depsOnly) {
+      options.noParse = b._noParse;
+      options.resolve = b._resolve.bind(b);
+      options.transform = b._transforms;
+
+      b.deps(options).pipe(through(logdeps));
+
+      function logdeps(dep) {
+        console.log(dep.id);
+      }
+    } else {
+      b.bundle(options, function (err, result) {
+        if (err) throw 'Error building ' + filename + ': ' + err;
+        var src = convert.removeComments(result);
+        var srcMap = convert.fromSource(result).toObject();
+
+        // Make the source file paths relative
+        srcMap.sources = srcMap.sources.map(function (src) {
+          return path.relative('./src', src);
+        });
+        srcMap.file = path.basename(filename);
+
+        var consumer = new SourceMapConsumer(srcMap);
+        var node = SourceNode.fromStringWithSourceMap(src, consumer);
+        write(filename, node);
+      });
+    }
+  }
+}

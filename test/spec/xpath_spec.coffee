@@ -1,5 +1,5 @@
 h = require('helpers')
-$ = require('../../src/util').$
+$ = require('jquery')
 xpath = require('../../src/xpath')
 
 describe 'xpath', ->
