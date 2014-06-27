@@ -1,6 +1,6 @@
 {
   "name": "xpath-range",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A (Browser) Range implementation / wrapper with XPath features, extracted from Annotator",
   "main": "lib/index.js",
   "scripts": {
@@ -13,7 +13,10 @@
     "url": "https://github.com/openannotation/xpath-range.git"
   },
   "author": "",
-  "license": "MIT + GPL-3.0+ Dual License",
+  "license": {
+    "name": "MIT + GPL-3.0+ Dual License",
+    "url": "https://github.com/openannotation/xpath-range/blob/master/LICENSE"
+  },
   "bugs": {
     "url": "https://github.com/openannotation/xpath-range/issues"
   },
