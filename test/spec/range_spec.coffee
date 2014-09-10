@@ -214,8 +214,9 @@ describe 'Range', ->
           setStartBefore: sinon.spy()
           setEndAfter: sinon.spy()
 
+        # If we're using the rangy library for older browsers, use that.
+        # Otherwise just use document.
         doc = rangy ? document
-
         sinon.stub(doc, 'createRange').returns(mockRange)
         r.toRange()
 
