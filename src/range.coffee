@@ -278,7 +278,10 @@ class Range.NormalizedRange
   #
   # Returns a Range object.
   toRange: ->
-    range = document.createRange()
+    # If we're using the rangy library for older browsers, use that.
+    # Otherwise just use document.
+    doc = rangy ? document
+    range = doc.createRange()
     range.setStartBefore(@start)
     range.setEndAfter(@end)
     range

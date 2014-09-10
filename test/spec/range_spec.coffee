@@ -214,13 +214,15 @@ describe 'Range', ->
           setStartBefore: sinon.spy()
           setEndAfter: sinon.spy()
 
-        sinon.stub(document, 'createRange').returns(mockRange)
+        doc = rangy ? document
+
+        sinon.stub(doc, 'createRange').returns(mockRange)
         r.toRange()
 
-        assert(document.createRange.calledOnce)
+        assert(doc.createRange.calledOnce)
         assert(mockRange.setStartBefore.calledOnce)
         assert.isTrue(mockRange.setStartBefore.calledWith(r.start))
         assert(mockRange.setEndAfter.calledOnce)
         assert.isTrue(mockRange.setEndAfter.calledWith(r.end))
 
-        document.createRange.restore()
+        doc.createRange.restore()

@@ -87,7 +87,10 @@ Util.contains = (parent, child) ->
 # value of the selection. What this returns is very close to what the user
 # actually sees.
 Util.readRangeViaSelection = (range) ->
-  sel = Util.getGlobal().getSelection() # Get the browser selection object
+  # If we're using the rangy library for older browsers, use that.
+  # Otherwise get window from the global space.
+  win = rangy ? Util.getGlobal()
+  sel = win.getSelection() # Get the browser selection object
   sel.removeAllRanges()                 # clear the selection
   sel.addRange range.toRange()          # Select the range
   sel.toString()                        # Read out the selection
