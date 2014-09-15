@@ -381,7 +381,8 @@ class Range.SerializedRange
     contains =
       if document.compareDocumentPosition?
         # Everyone else
-        (a, b) -> a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_CONTAINED_BY
+        (a, b) -> a.compareDocumentPosition(b) &
+          Node.DOCUMENT_POSITION_CONTAINED_BY
 
       else
         # Newer IE
