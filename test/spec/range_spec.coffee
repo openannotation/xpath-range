@@ -42,7 +42,6 @@ describe 'Range', ->
     mockSelection = (ii) -> new h.MockSelection(h.fix(), testData[ii])
 
   afterEach ->
-    delete a
     h.clearFixtures()
 
   describe "SerializedRange", ->
