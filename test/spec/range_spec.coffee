@@ -193,20 +193,3 @@ describe 'Range', ->
           end: paraText2
         })
         assert.equal(range.limit(otherDiv), null)
-
-    describe "toRange", ->
-      it "should return a new Range object", ->
-        mockRange =
-          setStartBefore: sinon.spy()
-          setEndAfter: sinon.spy()
-
-        sinon.stub(document, 'createRange').returns(mockRange)
-        r.toRange()
-
-        assert(document.createRange.calledOnce)
-        assert(mockRange.setStartBefore.calledOnce)
-        assert.isTrue(mockRange.setStartBefore.calledWith(r.start))
-        assert(mockRange.setEndAfter.calledOnce)
-        assert.isTrue(mockRange.setEndAfter.calledWith(r.end))
-
-        document.createRange.restore()
