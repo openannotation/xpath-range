@@ -266,26 +266,6 @@ class Range.NormalizedRange
     # Return the textNodes that fall between the start and end indexes.
     $.makeArray textNodes[start..end]
 
-  # Public: Converts the Normalized range to a native browser range.
-  #
-  # See: https://developer.mozilla.org/en/DOM/range
-  #
-  # Examples
-  #
-  #   selection = window.getSelection()
-  #   selection.removeAllRanges()
-  #   selection.addRange(normedRange.toRange())
-  #
-  # Returns a Range object.
-  toRange: ->
-    # If we're using the rangy library for older browsers, use that.
-    # Otherwise just use document.
-    doc = rangy ? document
-    range = doc.createRange()
-    range.setStartBefore(@start)
-    range.setEndAfter(@end)
-    range
-
 # Public: A range suitable for storing in local storage or serializing to JSON.
 class Range.SerializedRange
 

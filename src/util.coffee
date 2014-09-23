@@ -80,22 +80,6 @@ Util.contains = (parent, child) ->
     node = node.parentNode
   return false
 
-
-# Public: read out the text value of a range using the selection API
-#
-# This method selects the specified range, and asks for the string
-# value of the selection. What this returns is very close to what the user
-# actually sees.
-Util.readRangeViaSelection = (range) ->
-  # If we're using the rangy library for older browsers, use that.
-  # Otherwise get window from the global space.
-  win = rangy ? Util.getGlobal()
-  sel = win.getSelection() # Get the browser selection object
-  sel.removeAllRanges()                 # clear the selection
-  sel.addRange range.toRange()          # Select the range
-  sel.toString()                        # Read out the selection
-
-
 # Public: Flatten a nested array structure
 #
 # Returns an array
