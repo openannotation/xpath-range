@@ -46,17 +46,11 @@ describe 'Range', ->
 
   describe "SerializedRange", ->
     beforeEach ->
-      # This is needed so that we can read ranges via selection API
-      $(h.fix()).show()
-
       r = new Range.SerializedRange
         start: "/p/strong"
         startOffset: 13
         end: "/p/strong"
         endOffset: 27
-
-    afterEach ->
-      $(h.fix()).hide()
 
     describe "normalize", ->
       it "should return a normalized range", ->
@@ -70,32 +64,25 @@ describe 'Range', ->
         assert.isTrue(norm instanceof Range.NormalizedRange)
         assert.equal(norm.text(), "Pellentesque habitant morbi")
 
-      it "should always find the right text elements, based on offset", ->
+      it "with the start property == first text node in the range", ->
+        # Split the targeted text ("Pellentesque...tristique") into textnodes of
+        # width 1.
+        node = h.fix().firstChild.firstChild.firstChild
+        while node.data.length > 1
+          node = node.splitText(1)
 
-        # Create a normalized range to find the text node.
-        # This will split text nodes.
-        norm = r.normalize h.fix()
+        norm = r.normalize(h.fix())
+        assert.equal(norm.start.data, 'h')
 
-        # We should get the usual text
-        assert.equal(norm.start.data, "habitant morbi")
-        assert.equal(norm.text(), "habitant morbi")
-        assert.equal(Util.readRangeViaSelection(norm), "habitant morbi")
+      it "with the end property == last text node (inclusive) of the range", ->
+        # Split the targeted text ("Pellentesque...tristique") into textnodes of
+        # width 1.
+        node = h.fix().firstChild.firstChild.firstChild
+        while node.data.length > 1
+          node = node.splitText(1)
 
-        # Now let's insert a <hr /> tag before and after the text node!
-        # (Since the <hr /> tag is not a text node, this should not change
-        # the text nodes and their offsets.)
-        hr1 = document.createElement "hr"
-        hr2 = document.createElement "hr"
-        norm.start.parentNode.insertBefore hr1, norm.start
-        norm.start.parentNode.insertBefore hr2, norm.start.nextSibling
-
-        # Now let's try to normalize the same range again,
-        # this time working with the text nodes already split by last action
-        norm = r.normalize h.fix()
-
-        # We should get the same text as last time:
-        assert.equal(Util.readRangeViaSelection(norm), "habitant morbi")
-        assert.equal(norm.text(), "habitant morbi")
+        norm = r.normalize(h.fix())
+        assert.equal(norm.end.data, 'i')
 
       it "should raise Range.RangeError if it cannot normalize the range", ->
         check = false
