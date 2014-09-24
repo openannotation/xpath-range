@@ -359,15 +359,22 @@ class Range.SerializedRange
     # commonAncestorContainer and bail out.
 
     contains =
-      if not document.compareDocumentPosition?
-        # IE
-        (a, b) -> a.contains(b)
-      else
+      if document.compareDocumentPosition?
         # Everyone else
-        (a, b) -> a.compareDocumentPosition(b) & 16
+        (a, b) -> a.compareDocumentPosition(b) &
+          Node.DOCUMENT_POSITION_CONTAINED_BY
+
+      else
+        # Newer IE
+        (a, b) -> a.contains(b)
 
     $(range.startContainer).parents().each ->
-      if contains(this, range.endContainer)
+      if range.endContainer.nodeType == Node.TEXT_NODE
+        endContainer = range.endContainer.parentNode
+      else
+        endContainer = range.endContainer
+
+      if contains(this, endContainer)
         range.commonAncestorContainer = this
         return false
 
