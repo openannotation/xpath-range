@@ -2,12 +2,28 @@ $ = require('jquery')
 
 Util = {}
 
+# Public: DOM Node type identifiers. These are exposed on the Node global in
+# most browsers, but (surprise, surprise) not in IE.
+Util.NodeTypes =
+  ELEMENT_NODE: 1
+  ATTRIBUTE_NODE: 2
+  TEXT_NODE: 3
+  CDATA_SECTION_NODE: 4
+  ENTITY_REFERENCE_NODE: 5
+  ENTITY_NODE: 6
+  PROCESSING_INSTRUCTION_NODE: 7
+  COMMENT_NODE: 8
+  DOCUMENT_NODE: 9
+  DOCUMENT_TYPE_NODE: 10
+  DOCUMENT_FRAGMENT_NODE: 11
+  NOTATION_NODE: 12
+
 # Public: determine the first text node in or after the given jQuery node.
 Util.getFirstTextNodeNotBefore = (n) ->
   switch n.nodeType
-    when Node.TEXT_NODE
+    when Util.NodeTypes.TEXT_NODE
       return n # We have found our text node.
-    when Node.ELEMENT_NODE
+    when Util.NodeTypes.ELEMENT_NODE
       # This is an element, we need to dig in
       if n.firstChild? # Does it have children at all?
         result = Util.getFirstTextNodeNotBefore n.firstChild
@@ -24,9 +40,9 @@ Util.getFirstTextNodeNotBefore = (n) ->
 # Public: determine the last text node inside or before the given node
 Util.getLastTextNodeUpTo = (n) ->
   switch n.nodeType
-    when Node.TEXT_NODE
+    when Util.NodeTypes.TEXT_NODE
       return n # We have found our text node.
-    when Node.ELEMENT_NODE
+    when Util.NodeTypes.ELEMENT_NODE
       # This is an element, we need to dig in
       if n.lastChild? # Does it have children at all?
         result = Util.getLastTextNodeUpTo n.lastChild
@@ -45,14 +61,14 @@ Util.getLastTextNodeUpTo = (n) ->
 # Returns a new jQuery collection of text nodes.
 Util.getTextNodes = (jq) ->
   getTextNodes = (node) ->
-    if node and node.nodeType != Node.TEXT_NODE
+    if node and node.nodeType != Util.NodeTypes.TEXT_NODE
       nodes = []
 
       # If not a comment then traverse children collecting text nodes.
       # We traverse the child nodes manually rather than using the .childNodes
       # property because IE9 does not update the .childNodes property after
       # .splitText() is called on a child text node.
-      if node.nodeType != Node.COMMENT_NODE
+      if node.nodeType != Util.NodeTypes.COMMENT_NODE
         # Start at the last child and walk backwards through siblings.
         node = node.lastChild
         while node

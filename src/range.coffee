@@ -97,14 +97,14 @@ class Range.BrowserRange
 
     # Make sure the common ancestor is an element node.
     nr.commonAncestor = @commonAncestorContainer
-    while nr.commonAncestor.nodeType isnt Node.ELEMENT_NODE
+    while nr.commonAncestor.nodeType isnt Util.NodeTypes.ELEMENT_NODE
       nr.commonAncestor = nr.commonAncestor.parentNode
 
     new Range.NormalizedRange(nr)
 
   _normalizeStart: (r) ->
     # Look at the start
-    if @startContainer.nodeType is Node.ELEMENT_NODE
+    if @startContainer.nodeType is Util.NodeTypes.ELEMENT_NODE
       # We are dealing with element nodes
       r.start = Util.getFirstTextNodeNotBefore(
         @startContainer.childNodes[@startOffset]
@@ -117,14 +117,14 @@ class Range.BrowserRange
 
   _normalizeEnd: (r) ->
     # Look at the end
-    if @endContainer.nodeType is Node.ELEMENT_NODE
+    if @endContainer.nodeType is Util.NodeTypes.ELEMENT_NODE
       # Get specified node.
       node = @endContainer.childNodes[@endOffset]
 
       if node? # Does that node exist?
         # Look for a text node either at the immediate beginning of node
         n = node
-        while n? and (n.nodeType isnt Node.TEXT_NODE)
+        while n? and (n.nodeType isnt Util.NodeTypes.TEXT_NODE)
           n = n.firstChild
         if n? # Did we find a text node at the start of this element?
           r.end = n
@@ -369,7 +369,7 @@ class Range.SerializedRange
         (a, b) -> a.contains(b)
 
     $(range.startContainer).parents().each ->
-      if range.endContainer.nodeType == Node.TEXT_NODE
+      if range.endContainer.nodeType == Util.NodeTypes.TEXT_NODE
         endContainer = range.endContainer.parentNode
       else
         endContainer = range.endContainer
