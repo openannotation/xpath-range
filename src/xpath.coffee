@@ -11,19 +11,16 @@ evaluateXPath = (xp, root = document, nsResolver = null) ->
       null
     ).singleNodeValue
   catch exception
-    # There are cases when the evaluation fails, because the
-    # HTML documents contains nodes with invalid names,
-    # for example tags with equal signs in them, or something like that.
-    # In these cases, the XPath expressions will have these abominations,
-    # too, and then they can not be evaluated.
-    # In these cases, we get an XPathException, with error code 52.
-    # See http://www.w3.org/TR/DOM-Level-3-XPath/xpath.html#XPathException
-    # This does not necessarily make any sense, but this what we see
-    # happening.
-    console.log "XPath evaluation failed."
-    console.log "Trying fallback..."
-    # An 'evaluator' for the really simple expressions that
-    # should work for the simple expressions we generate.
+    # There are cases when the evaluation fails, because the HTML documents
+    # contains nodes with invalid names, for example tags with equal signs in
+    # them, or something like that. In these cases, the XPath expressions will
+    # have these abominations, too, and then they can not be evaluated. In these
+    # cases, we get an XPathException, with error code 52. See
+    # http://www.w3.org/TR/DOM-Level-3-XPath/xpath.html#XPathException This does
+    # not necessarily make any sense, but this what we see happening.
+    #
+    # This is an 'evaluator' that should work for the simple expressions we
+    # generate.
     steps = xp.substring(1).split("/")
     node = root
     for step in steps
@@ -123,8 +120,6 @@ fromNode = ($el, relativeRoot) ->
   try
     result = simpleXPathJQuery $el, relativeRoot
   catch exception
-    console.log("jQuery-based XPath construction failed! Falling back to
-                 manual.")
     result = simpleXPathPure $el, relativeRoot
   result
 
