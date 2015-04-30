@@ -155,25 +155,47 @@ describe 'Range', ->
       headText = null
       paraText = null
       paraText2 = null
+      paraText3 = null
+      para2Text = null
       para = null
       root = null
 
       beforeEach ->
         headText  = document.createTextNode("My Heading")
         paraText  = document.createTextNode("My paragraph")
-        paraText2 = document.createTextNode(" continues")
+        paraText2 = document.createTextNode(" conti")
+        paraText3 = document.createTextNode("nues")
+        para2Text = document.createTextNode("Another paragraph begins")
 
         head = document.createElement('h1')
         head.appendChild(headText)
         para = document.createElement('p')
         para.appendChild(paraText)
-        para.appendChild(paraText2)
+        span = document.createElement('span')
+        span.appendChild(paraText2)
+        span.appendChild(paraText3)
+        para.appendChild(span)
+        para2 = document.createElement('p')
+        para2.appendChild(para2Text)
 
         root = document.createElement('div')
         root.appendChild(head)
         root.appendChild(para)
+        root.appendChild(para2)
 
-      it "should exclude any nodes not within the bounding element.", ->
+      it "should be a no-op if all nodes are within the bounding element.", ->
+        range = new Range.NormalizedRange({
+          commonAncestor: para
+          start: paraText
+          end: paraText2
+        })
+
+        range = range.limit(para)
+        assert.equal(range.commonAncestor, para)
+        assert.equal(range.start, paraText)
+        assert.equal(range.end, paraText2)
+
+      it "should exclude any nodes to the left of the bounding element.", ->
         range = new Range.NormalizedRange({
           commonAncestor: root
           start: headText
@@ -184,6 +206,30 @@ describe 'Range', ->
         assert.equal(range.commonAncestor, para)
         assert.equal(range.start, paraText)
         assert.equal(range.end, paraText2)
+
+      it "should exclude any nodes to the right of the bounding element.", ->
+        range = new Range.NormalizedRange({
+          commonAncestor: root
+          start: paraText
+          end: para2Text
+        })
+
+        range = range.limit(para)
+        assert.equal(range.commonAncestor, para)
+        assert.equal(range.start, paraText)
+        assert.equal(range.end, paraText3)
+
+      it "should exclude any nodes on either side of the bounding element.", ->
+        range = new Range.NormalizedRange({
+          commonAncestor: root
+          start: headText
+          end: para2Text
+        })
+
+        range = range.limit(para)
+        assert.equal(range.commonAncestor, para)
+        assert.equal(range.start, paraText)
+        assert.equal(range.end, paraText3)
 
       it "should return null if no nodes fall within the bounds", ->
         otherDiv = document.createElement('div')
