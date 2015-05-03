@@ -195,7 +195,7 @@ class Range.NormalizedRange
     if not $.contains(@commonAncestor, bounds)
       return null
 
-    document = Util.getGlobal().document
+    document = bounds.ownerDocument
 
     if not $.contains(bounds, @start)
       walker = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT)

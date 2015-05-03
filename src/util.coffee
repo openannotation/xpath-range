@@ -61,7 +61,7 @@ Util.getLastTextNodeUpTo = (n) ->
 # Returns a new jQuery collection of text nodes.
 Util.getTextNodes = (jq) ->
   getTextNodes = (root) ->
-    document = Util.getGlobal().document
+    document = root.ownerDocument
     walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
     nodes = (node while node = walker.nextNode())
     return nodes
