@@ -68,8 +68,6 @@ Util.getTextNodes = (jq) ->
 
   jq.map -> getTextNodes(this)
 
-Util.getGlobal = -> (-> this)()
-
 # Public: decides whether node A is an ancestor of node B.
 #
 # This function purposefully ignores the native browser function for this,
