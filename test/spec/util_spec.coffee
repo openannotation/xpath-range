@@ -2,11 +2,6 @@ h = require('helpers')
 $ = require('jquery')
 Util = require('../../src/util')
 
-describe 'Util.flatten()', ->
-  it "flattens the contents of an Array", ->
-    flattened = Util.flatten([[1,2], 'lorem ipsum', [{}]])
-    assert.deepEqual(flattened, [1, 2, 'lorem ipsum', {}])
-
 describe 'Util.getTextNodes()', ->
   $fix = null
 

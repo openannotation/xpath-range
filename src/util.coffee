@@ -82,20 +82,6 @@ Util.contains = (parent, child) ->
     node = node.parentNode
   return false
 
-# Public: Flatten a nested array structure
-#
-# Returns an array
-Util.flatten = (array) ->
-  flatten = (ary) ->
-    flat = []
-
-    for el in ary
-      flat = flat.concat(if el and $.isArray(el) then flatten(el) else el)
-
-    return flat
-
-  flatten(array)
-
 
 # Export Util object
 module.exports = Util
