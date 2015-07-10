@@ -1,5 +1,3 @@
-$ = require('jquery')
-
 Util = {}
 
 # Public: DOM Node type identifiers. These are exposed on the Node global in
