@@ -62,7 +62,7 @@ Util.getLastTextNodeUpTo = (n) ->
 Util.getTextNodes = (jq) ->
   getTextNodes = (root) ->
     document = root.ownerDocument
-    walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false)
     nodes = (node while node = walker.nextNode())
     return nodes
 
