@@ -77,7 +77,9 @@ class Range.BrowserRange
         nr.start = r.start.splitText(r.startOffset)
       else
         # Avoid splitting off zero-length pieces.
-        nr.start = r.start.nextSibling
+        previousNode = r.start
+        previousNode = previousNode.parentNode until previousNode.nextSibling
+        nr.start = previousNode.nextSibling
     else
       nr.start = r.start
 
