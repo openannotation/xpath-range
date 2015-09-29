@@ -20,14 +20,14 @@ describe 'xpath', ->
 
       pathToFixHTML = '/html[1]/body[1]/div[1]'
 
-      assert.deepEqual(xpath.fromNode($fix.find('p')), [pathToFixHTML + '/p[1]', pathToFixHTML + '/p[2]'])
-      assert.deepEqual(xpath.fromNode($fix.find('span')), [pathToFixHTML + '/ol[1]/li[2]/span[1]'])
-      assert.deepEqual(xpath.fromNode($fix.find('strong')), [pathToFixHTML + '/p[2]/strong[1]'])
+      assert.deepEqual(xpath.fromNode($fix.find('p')[0]), pathToFixHTML + '/p[1]')
+      assert.deepEqual(xpath.fromNode($fix.find('span')[0]), pathToFixHTML + '/ol[1]/li[2]/span[1]')
+      assert.deepEqual(xpath.fromNode($fix.find('strong')[0]), pathToFixHTML + '/p[2]/strong[1]')
 
     it "takes an optional parameter determining the element from which XPaths should be calculated", ->
       ol = $fix.find('ol').get(0)
-      assert.deepEqual(xpath.fromNode($fix.find('li'), ol), ['/li[1]', '/li[2]', '/li[3]'])
-      assert.deepEqual(xpath.fromNode($fix.find('span'), ol), ['/li[2]/span[1]'])
+      assert.deepEqual(xpath.fromNode($fix.find('li')[0], ol), '/li[1]')
+      assert.deepEqual(xpath.fromNode($fix.find('span')[0], ol), '/li[2]/span[1]')
 
   describe "#toNode()", ->
     path = "/p[2]/strong"

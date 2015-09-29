@@ -1,5 +1,10 @@
-$ = require('jquery')
 Util = require('./util')
+
+# Taken from jQuery
+isXML = (elem) ->
+  documentElement = elem and (elem.ownerDocument or elem).documentElement
+  return documentElement and documentElement.nodeName isnt 'HTML' or false
+
 
 evaluateXPath = (xp, root = document, nsResolver = null) ->
   try
@@ -29,34 +34,12 @@ evaluateXPath = (xp, root = document, nsResolver = null) ->
       node = findChild node, name.toLowerCase(), idx
     node
 
-# Get xpath strings to the provided nodes relative to the provided root
+# Get xpath string to the provided node relative to the provided root
 #
 # relativeRoot - A jQuery object of the nodes whose xpaths are requested.
 #
-# Returns Array[String]
-simpleXPathJQuery = ($el, relativeRoot) ->
-  jq = $el.map ->
-    path = ''
-    elem = this
-
-    while elem?.nodeType == Util.NodeTypes.ELEMENT_NODE and elem != relativeRoot
-      tagName = elem.tagName.replace(":", "\\:")
-      idx = $(elem.parentNode).children(tagName).index(elem) + 1
-
-      idx  = "[#{idx}]"
-      path = "/" + elem.tagName.toLowerCase() + idx + path
-      elem = elem.parentNode
-
-    path
-
-  jq.get()
-
-# Get xpath strings to the provided nodes relative to the provided root
-#
-# relativeRoot - A jQuery object of the nodes whose xpaths are requested.
-#
-# Returns Array[String]
-simpleXPathPure = ($el, relativeRoot) ->
+# Returns String
+simpleXPathPure = (node, relativeRoot) ->
 
   getPathSegment = (node) ->
     name = getNodeName node
@@ -77,12 +60,7 @@ simpleXPathPure = ($el, relativeRoot) ->
     xpath = xpath.replace /\/$/, ''
     xpath
 
-  jq = $el.map ->
-    path = getPathTo this
-
-    path
-
-  jq.get()
+  return getPathTo(node)
 
 findChild = (node, type, index) ->
   unless node.hasChildNodes()
@@ -116,12 +94,9 @@ getNodePosition = (node) ->
     tmp = tmp.previousSibling
   pos
 
-fromNode = ($el, relativeRoot) ->
-  try
-    result = simpleXPathJQuery $el, relativeRoot
-  catch exception
-    result = simpleXPathPure $el, relativeRoot
-  result
+# Public: Compute an XPath expression for the given node.
+fromNode = (node, relativeRoot = document) ->
+  return simpleXPathPure node, relativeRoot
 
 # Public: Finds an Element Node using an XPath relative to the document root.
 #
@@ -138,7 +113,7 @@ fromNode = ($el, relativeRoot) ->
 #
 # Returns the Node if found otherwise null.
 toNode = (path, root = document) ->
-  if not $.isXMLDoc document.documentElement
+  if not isXML document.documentElement
     evaluateXPath path, root
   else
     # We're in an XML document, create a namespace resolver function to try

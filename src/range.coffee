@@ -232,7 +232,7 @@ class Range.NormalizedRange
       else
         origParent = $(node).parent()
 
-      path = xpath.fromNode(origParent, root)[0]
+      path = xpath.fromNode(origParent[0], root)
       textNodes = Util.getTextNodes(origParent)
 
       # Calculate real offset as the combined length of all the

@@ -9,7 +9,7 @@ class MockSelection
   constructor: (fixElem, data) ->
 
     @root = fixElem
-    @rootXPath = xpath.fromNode($(fixElem))[0]
+    @rootXPath = xpath.fromNode(fixElem)
 
     @startContainer = this.resolvePath(data[0])
     @startOffset    = data[1]
@@ -21,7 +21,7 @@ class MockSelection
     @commonAncestor = @startContainer
     while not Util.contains(@commonAncestor, @endContainer)
       @commonAncestor = @commonAncestor.parentNode
-    @commonAncestorXPath = xpath.fromNode($(@commonAncestor))[0]
+    @commonAncestorXPath = xpath.fromNode(@commonAncestor)
 
     @ranges = []
     this.addRange({
