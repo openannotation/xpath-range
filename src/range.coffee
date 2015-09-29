@@ -228,17 +228,17 @@ class Range.NormalizedRange
 
     serialization = (node, isEnd) ->
       if ignoreSelector
-        origParent = $(node).parents(":not(#{ignoreSelector})").eq(0)
+        origParent = $(node).parents(":not(#{ignoreSelector})").eq(0)[0]
       else
-        origParent = $(node).parent()
+        origParent = $(node).parent()[0]
 
-      path = xpath.fromNode(origParent[0], root)
+      path = xpath.fromNode(origParent, root)
       textNodes = Util.getTextNodes(origParent)
 
       # Calculate real offset as the combined length of all the
       # preceding textNode siblings. We include the length of the
       # node if it's the end node.
-      nodes = textNodes.slice(0, textNodes.index(node))
+      nodes = textNodes.slice(0, textNodes.indexOf(node))
       offset = 0
       for n in nodes
         offset += n.nodeValue.length
@@ -266,14 +266,14 @@ class Range.NormalizedRange
       node.nodeValue
     ).join ''
 
-  # Public: Fetches only the text nodes within th range.
+  # Public: Fetches only the text nodes within the range.
   #
   # Returns an Array of TextNode instances.
   textNodes: ->
-    textNodes = Util.getTextNodes($(this.commonAncestor))
-    [start, end] = [textNodes.index(this.start), textNodes.index(this.end)]
+    textNodes = Util.getTextNodes(this.commonAncestor)
+    [start, end] = [textNodes.indexOf(this.start), textNodes.indexOf(this.end)]
     # Return the textNodes that fall between the start and end indexes.
-    $.makeArray textNodes[start..end]
+    return textNodes[start..end]
 
 # Public: A range suitable for storing in local storage or serializing to JSON.
 class Range.SerializedRange
@@ -327,7 +327,7 @@ class Range.SerializedRange
       # Target the string index of the last character inside the range.
       if p is 'end' then targetOffset -= 1
 
-      for tn in Util.getTextNodes($(node))
+      for tn in Util.getTextNodes(node)
         if (length + tn.nodeValue.length > targetOffset)
           range[p + 'Container'] = tn
           range[p + 'Offset'] = this[p + 'Offset'] - length

@@ -54,17 +54,16 @@ Util.getLastTextNodeUpTo = (n) ->
   else
     null
 
-# Public: Finds all text nodes within the elements in the current collection.
+# Public: Find all text nodes within the given node.
 #
-# Returns a new jQuery collection of text nodes.
-Util.getTextNodes = (jq) ->
-  getTextNodes = (root) ->
-    document = root.ownerDocument
-    walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false)
-    nodes = (node while node = walker.nextNode())
-    return nodes
-
-  jq.map -> getTextNodes(this)
+# Returns an Array of the text nodes.
+Util.getTextNodes = (node) ->
+  if not node.ownerDocument?
+    debugger
+  document = node.ownerDocument
+  walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false)
+  nodes = (next while next = walker.nextNode())
+  return nodes
 
 # Public: decides whether node A is an ancestor of node B.
 #

@@ -12,7 +12,7 @@ describe 'Util.getTextNodes()', ->
   afterEach -> h.clearFixtures()
 
   it "returns an element's textNode descendants", ->
-    nodes = Util.getTextNodes($fix)
+    nodes = Util.getTextNodes($fix[0])
     text = (node.nodeValue for node in nodes)
 
     expectation = [ '\n  '
@@ -27,11 +27,6 @@ describe 'Util.getTextNodes()', ->
                   ]
 
     assert.deepEqual(text, expectation)
-
-  it "returns an empty jQuery collection when called in undefined node", ->
-    result = Util.getTextNodes($(undefined))
-    assert.instanceOf(result, $)
-    assert.lengthOf(result, 0)
 
   it "returns an element's TextNodes after Text.splitText() text has been called", ->
     # Build a very csutom fixture to replicate an issue in IE9 where calling
@@ -65,5 +60,4 @@ describe 'Util.getTextNodes()', ->
     # assert.lengthOf(para.childNodes, 2)
     # assert.lengthOf($(para).contents(), 2)
 
-    assert.lengthOf(Util.getTextNodes($(para)), 2)
-
+    assert.lengthOf(Util.getTextNodes(para), 2)

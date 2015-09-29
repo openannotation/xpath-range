@@ -45,7 +45,7 @@ class MockSelection
 
   resolvePath: (path) ->
     if typeof path is "number"
-      Util.getTextNodes($(@root))[path]
+      Util.getTextNodes(@root)[path]
     else if typeof path is "string"
       this.resolveXPath(@rootXPath + path)
 
@@ -53,8 +53,8 @@ class MockSelection
     document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
 
 textInNormedRange = (range) ->
-  textNodes = Util.getTextNodes($(range.commonAncestor))
-  textNodes = textNodes[textNodes.index(range.start)..textNodes.index(range.end)].get()
+  textNodes = Util.getTextNodes(range.commonAncestor)
+  textNodes = textNodes[textNodes.indexOf(range.start)..textNodes.indexOf(range.end)]
   textNodes.reduce(((acc, next) -> acc += next.nodeValue), "")
 
 DateToISO8601String = (format=6, offset) ->
