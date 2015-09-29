@@ -16,7 +16,7 @@ Util.NodeTypes =
   DOCUMENT_FRAGMENT_NODE: 11
   NOTATION_NODE: 12
 
-# Public: determine the first text node in or after the given jQuery node.
+# Public: determine the first text node in or after the given node.
 Util.getFirstTextNodeNotBefore = (n) ->
   switch n.nodeType
     when Util.NodeTypes.TEXT_NODE
