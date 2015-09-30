@@ -1,10 +1,32 @@
 ancestors = require('ancestors')
-contains = require('contains')
 matches = require('matches-selector')
 xpath = require('./xpath')
 Util = require('./util')
 
 Range = {}
+
+# Unfortunately Node.contains() is broken in Safari 5.1.5 (7534.55.3)
+# and presumably other earlier versions of WebKit. In particular, in a
+# document like
+#
+#   <p>Hello</p>
+#
+# the code
+#
+#   p = document.getElementsByTagName('p')[0]
+#   p.contains(p.firstChild)
+#
+# returns `false`. Yay.
+#
+# So instead, we use Node.compareDocumentPosition() and only fall back
+# to Node.contains if necessary.
+
+contains =
+  if document.compareDocumentPosition?
+    (a, b) -> a.compareDocumentPosition(b) &
+      Node.DOCUMENT_POSITION_CONTAINED_BY
+  else
+    (a, b) -> a.contains(b)
 
 # Public: Determines the type of Range of the provided object and returns
 # a suitable Range instance.
