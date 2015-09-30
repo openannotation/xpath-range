@@ -126,10 +126,12 @@ getFixture = (fname) ->
   fixtureMemo[fname]
 
 addFixture = (fname) ->
-  $(getFixture(fname)).appendTo(fixtureElem)
+  contents = getFixture(fname)
+  fixtureElem.innerHTML = contents
 
 clearFixtures = ->
-  $(fixtureElem).empty()
+  while fixtureElem.firstChild
+    fixtureElem.removeChild(fixtureElem.firstChild)
 
 exports.MockSelection = MockSelection
 exports.textInNormedRange = textInNormedRange

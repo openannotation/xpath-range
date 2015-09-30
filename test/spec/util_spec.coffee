@@ -1,18 +1,17 @@
 h = require('helpers')
-$ = require('jquery')
 Util = require('../../src/util')
 
 describe 'Util.getTextNodes()', ->
-  $fix = null
+  fix = null
 
   beforeEach ->
     h.addFixture 'textnodes'
-    $fix = $(h.fix())
+    fix = h.fix()
 
   afterEach -> h.clearFixtures()
 
   it "returns an element's textNode descendants", ->
-    nodes = Util.getTextNodes($fix[0])
+    nodes = Util.getTextNodes(fix)
     text = (node.nodeValue for node in nodes)
 
     expectation = [ '\n  '
@@ -24,6 +23,7 @@ describe 'Util.getTextNodes()', ->
                   , 'dolor sit '
                   , 'amet'
                   , '. humpty dumpty. etc.'
+                  , '\n\n'
                   ]
 
     assert.deepEqual(text, expectation)
@@ -32,7 +32,7 @@ describe 'Util.getTextNodes()', ->
     # Build a very csutom fixture to replicate an issue in IE9 where calling
     # split text on an text node does not update the parents .childNodes value
     # which continues to return the unsplit text node.
-    fixture = document.getElementById('fixtures') || $('body')[0]
+    fixture = document.getElementById('fixtures') || document.body
     fixture.innerHTML = ''
 
     para = document.createElement('p')

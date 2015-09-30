@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/openannotation/xpath-range",
   "dependencies": {
-    "jquery": "~1.11.0"
+    "ancestors": "0.0.3",
+    "contains": "^0.1.1",
+    "matches-selector": "^1.0.0"
   },
   "devDependencies": {
     "browserify": "^4.1.10",
@@ -32,6 +34,7 @@
     "connect": "~2.10.1",
     "convert-source-map": "~0.3.1",
     "glob": "3.2.9",
+    "jquery": "~1.11.0",
     "kew": "~0.2.2",
     "mocha": "~1.12.1",
     "mocha-phantomjs": "~3.3.2",

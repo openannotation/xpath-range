@@ -2,7 +2,6 @@ h = require('helpers')
 
 Range = require('../../src/range')
 Util = require('../../src/util')
-$ = require('jquery')
 
 testData = [
   [ 0,           13,  0,           27,  "habitant morbi",                                    "Partial node contents." ]
@@ -86,8 +85,9 @@ describe 'Range', ->
 
       it "should raise Range.RangeError if it cannot normalize the range", ->
         check = false
+        root = document.createElement('div')
         try
-          r.normalize($('<div/>')[0])
+          r.normalize(root)
         catch e
           if e instanceof Range.RangeError
             check = true
@@ -142,7 +142,7 @@ describe 'Range', ->
     it "textNodes() returns an array of textNodes", ->
       textNodes = r.textNodes()
 
-      assert.equal($.type(textNodes), 'array')
+      assert.isArray(textNodes)
       assert.lengthOf(textNodes, sel.endOffset)
 
       # Should contain the contents of the first <strong> element.

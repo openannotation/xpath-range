@@ -1,6 +1,8 @@
+ancestors = require('ancestors')
+contains = require('contains')
+matches = require('matches-selector')
 xpath = require('./xpath')
 Util = require('./util')
-$ = require('jquery')
 
 Range = {}
 
@@ -191,27 +193,27 @@ class Range.NormalizedRange
   #
   # Returns updated self or null.
   limit: (bounds) ->
-    if @commonAncestor == bounds or $.contains(bounds, @commonAncestor)
+    if @commonAncestor == bounds or contains(bounds, @commonAncestor)
       return this
 
-    if not $.contains(@commonAncestor, bounds)
+    if not contains(@commonAncestor, bounds)
       return null
 
     document = bounds.ownerDocument
 
-    if not $.contains(bounds, @start)
+    if not contains(bounds, @start)
       walker = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT)
       @start = walker.firstChild()
 
-    if not $.contains(bounds, @end)
+    if not contains(bounds, @end)
       walker = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT)
       @end = walker.lastChild()
 
     return null unless @start and @end
 
-    startParents = $(@start).parents()
-    for parent in $(@end).parents()
-      if startParents.index(parent) != -1
+    startParents = ancestors(@start)
+    for parent in ancestors(@end)
+      if startParents.indexOf(parent) != -1
         @commonAncestor = parent
         break
     this
@@ -228,9 +230,10 @@ class Range.NormalizedRange
 
     serialization = (node, isEnd) ->
       if ignoreSelector
-        origParent = $(node).parents(":not(#{ignoreSelector})").eq(0)[0]
+        filterFn = (node) -> not matches(node, ignoreSelector)
+        origParent = ancestors(node, filterFn)[0]
       else
-        origParent = $(node).parent()[0]
+        origParent = node.parentNode
 
       path = xpath.fromNode(origParent, root)
       textNodes = Util.getTextNodes(origParent)
@@ -344,48 +347,15 @@ class Range.SerializedRange
           "Couldn't find offset #{this[p + 'Offset']} in element #{this[p]}"
         )
 
-    # Here's an elegant next step...
-    #
-    #   range.commonAncestorContainer = $(range.startContainer)
-    #     .parents()
-    #     .has(range.endContainer)[0]
-    #
-    # ...but unfortunately Node.contains() is broken in Safari 5.1.5 (7534.55.3)
-    # and presumably other earlier versions of WebKit. In particular, in a
-    # document like
-    #
-    #   <p>Hello</p>
-    #
-    # the code
-    #
-    #   p = document.getElementsByTagName('p')[0]
-    #   p.contains(p.firstChild)
-    #
-    # returns `false`. Yay.
-    #
-    # So instead, we step through the parents from the bottom up and use
-    # Node.compareDocumentPosition() to decide when to set the
-    # commonAncestorContainer and bail out.
-
-    contains =
-      if document.compareDocumentPosition?
-        # Everyone else
-        (a, b) -> a.compareDocumentPosition(b) &
-          Node.DOCUMENT_POSITION_CONTAINED_BY
-
-      else
-        # Newer IE
-        (a, b) -> a.contains(b)
-
-    $(range.startContainer).parents().each ->
+    for node in ancestors(range.startContainer)
       if range.endContainer.nodeType == Util.NodeTypes.TEXT_NODE
         endContainer = range.endContainer.parentNode
       else
         endContainer = range.endContainer
 
-      if contains(this, endContainer)
-        range.commonAncestorContainer = this
-        return false
+      if contains(node, endContainer)
+        range.commonAncestorContainer = node
+        break
 
     new Range.BrowserRange(range).normalize(root)
 
