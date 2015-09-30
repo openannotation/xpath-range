@@ -1,6 +1,5 @@
 xpath = require('../src/xpath')
 Util = require('../src/util')
-$ = require('jquery')
 
 class MockSelection
   rangeCount: 0
@@ -105,39 +104,6 @@ DateToISO8601String = (format=6, offset) ->
 
   str
 
-# Ajax fixtures helpers
-
-fixtureElem = document.getElementById('fixtures')
-fixtureMemo = {}
-
-setFixtureElem = (elem) ->
-  fixtureElem = elem
-
-fix = ->
-  fixtureElem
-
-getFixture = (fname) ->
-  if not fixtureMemo[fname]?
-    fixtureMemo[fname] = $.ajax({
-      url: "/test/fixtures/#{fname}.html"
-      async: false
-    }).responseText
-
-  fixtureMemo[fname]
-
-addFixture = (fname) ->
-  contents = getFixture(fname)
-  fixtureElem.innerHTML = contents
-
-clearFixtures = ->
-  while fixtureElem.firstChild
-    fixtureElem.removeChild(fixtureElem.firstChild)
-
 exports.MockSelection = MockSelection
 exports.textInNormedRange = textInNormedRange
 exports.DateToISO8601String = DateToISO8601String
-exports.setFixtureElem = setFixtureElem
-exports.fix = fix
-exports.getFixture = getFixture
-exports.addFixture = addFixture
-exports.clearFixtures = clearFixtures

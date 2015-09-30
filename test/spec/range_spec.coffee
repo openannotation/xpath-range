@@ -1,4 +1,4 @@
-h = require('helpers')
+h = require('../helpers')
 
 Range = require('../../src/range')
 Util = require('../../src/util')
@@ -10,7 +10,7 @@ testData = [
   [ 0,           22,  1,           12,  "morbi tristique senectus et",                       "Spanning 2 nodes." ]
   [ '/p/strong', 0,   1,           12,  "Pellentesque habitant morbi tristique senectus et", "Spanning 2 nodes, elementNode start ref." ]
   [ 1,           165, '/p/em',     1,   "egestas semper. Aenean ultricies mi vitae est.",    "Spanning 2 nodes, elementNode end ref." ]
-  [ 9,           7,   12,          11,  "Level 2\n\n\n  Lorem ipsum",                        "Spanning multiple nodes, textNode refs." ]
+  [ 8,           7,   10,          11,  "Level 2\n  Lorem ipsum",                            "Spanning multiple nodes, textNode refs." ]
   [ '/p',        0,   '/p',        8,   "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis.", "Spanning multiple nodes, elementNode refs." ]
   [ '/p[2]',     0,   '/p[2]',     1,   "Lorem sed do eiusmod tempor.",                      "Full node contents with empty node at end."]
   [ "/div/text()[2]",0,"/div/text()[2]",28,"Lorem sed do eiusmod tempor.",                   "Text between br tags, textNode refs"]
@@ -29,19 +29,22 @@ testData = [
   [ "/div[2]",   3,"/div[2]/text()[2]",28,"Lorem sed do eiusmod tempor.",                    "Text between br tags, elementNode ref at start"]
   [ "/div[2]",   2,"/div[2]/text()[2]",28,"Lorem sed do eiusmod tempor.",                    "Text between br tags, with <p><br/></p> at the start"]
   [ "/div[2]",   1,"/div[2]/text()[2]",28,"Lorem sed do eiusmod tempor.",                    "Text between br tags, with <br/><p><br/></p> at the start"],
-  [ "/h2[2]",    0,"/p[4]", 0, "Header Level 2\n\n\n  Mauris lacinia ipsum nulla, id iaculis quam egestas quis.\n\n\n", "No text node at the end and offset 0"]
+  [ "/h2[2]",    0,"/p[4]", 0, "Header Level 2\n  Mauris lacinia ipsum nulla, id iaculis quam egestas quis.\n", "No text node at the end and offset 0"]
 ]
 
 describe 'Range', ->
   r = null
   mockSelection = null
 
+  before ->
+    fixture.setBase('test/fixtures')
+
   beforeEach ->
-    h.addFixture('range')
-    mockSelection = (ii) -> new h.MockSelection(h.fix(), testData[ii])
+    fixture.load('range.html')
+    mockSelection = (ii) -> new h.MockSelection(fixture.el, testData[ii])
 
   afterEach ->
-    h.clearFixtures()
+    fixture.cleanup()
 
   describe "SerializedRange", ->
     beforeEach ->
@@ -53,34 +56,34 @@ describe 'Range', ->
 
     describe "normalize", ->
       it "should return a normalized range", ->
-        norm = r.normalize(h.fix())
+        norm = r.normalize(fixture.el)
         assert.isTrue(norm instanceof Range.NormalizedRange)
         assert.equal(norm.text(), "habitant morbi")
 
       it "should return a normalized range with 0 offsets", ->
         r.startOffset = 0
-        norm = r.normalize(h.fix())
+        norm = r.normalize(fixture.el)
         assert.isTrue(norm instanceof Range.NormalizedRange)
         assert.equal(norm.text(), "Pellentesque habitant morbi")
 
       it "with the start property == first text node in the range", ->
         # Split the targeted text ("Pellentesque...tristique") into textnodes of
         # width 1.
-        node = h.fix().firstChild.firstChild.firstChild
+        node = fixture.el.firstChild.firstChild.firstChild
         while node.data.length > 1
           node = node.splitText(1)
 
-        norm = r.normalize(h.fix())
+        norm = r.normalize(fixture.el)
         assert.equal(norm.start.data, 'h')
 
       it "with the end property == last text node (inclusive) of the range", ->
         # Split the targeted text ("Pellentesque...tristique") into textnodes of
         # width 1.
-        node = h.fix().firstChild.firstChild.firstChild
+        node = fixture.el.firstChild.firstChild.firstChild
         while node.data.length > 1
           node = node.splitText(1)
 
-        norm = r.normalize(h.fix())
+        norm = r.normalize(fixture.el)
         assert.equal(norm.end.data, 'i')
 
       it "should raise Range.RangeError if it cannot normalize the range", ->
@@ -95,7 +98,7 @@ describe 'Range', ->
         assert.isTrue(check)
 
     it "serialize() returns a serialized range", ->
-      seri = r.serialize(h.fix())
+      seri = r.serialize(fixture.el)
       assert.equal(seri.start, "/p[1]/strong[1]")
       assert.equal(seri.startOffset, 13)
       assert.equal(seri.end, "/p[1]/strong[1]")
@@ -124,7 +127,7 @@ describe 'Range', ->
       ->
         sel   = mockSelection(i)
         range = new Range.BrowserRange(sel.getRangeAt(0))
-        norm  = range.normalize(h.fix())
+        norm  = range.normalize(fixture.el)
 
         assert.equal(h.textInNormedRange(norm), sel.expectation)
 

@@ -4,8 +4,7 @@
   "description": "A (Browser) Range implementation / wrapper with XPath features, extracted from Annotator",
   "main": "lib/index.js",
   "scripts": {
-    "test": "./tools/lint && ./tools/test",
-    "start": "./tools/serve",
+    "test": "coffeelint src && karma start --single-run",
     "prepublish": "coffee -o lib src/"
   },
   "repository": {
@@ -27,20 +26,16 @@
   },
   "devDependencies": {
     "browserify": "^4.1.10",
-    "coffee-script": "^1.7.1",
     "coffeeify": "^0.6.0",
     "coffeelint": "~1.1.0",
-    "connect": "~2.10.1",
-    "convert-source-map": "~0.3.1",
-    "glob": "3.2.9",
-    "jquery": "~1.11.0",
-    "kew": "~0.2.2",
-    "mocha": "~1.12.1",
-    "mocha-phantomjs": "~3.3.2",
-    "chai": "~1.7.2",
-    "sinon": "~1.6.0",
-    "source-map": "~0.1.32",
-    "through": "~2.3.4",
-    "watchify": "^0.10.2"
+    "karma": "^0.13.10",
+    "karma-browserify": "^4.3.0",
+    "karma-chai": "^0.1.0",
+    "karma-coffee-preprocessor": "^0.3.0",
+    "karma-fixture": "^0.2.5",
+    "karma-html2js-preprocessor": "^0.1.0",
+    "karma-mocha": "^0.2.0",
+    "karma-phantomjs-launcher": "^0.2.1",
+    "phantomjs": "^1.9.18"
   }
 }

@@ -1,15 +1,16 @@
-h = require('helpers')
+h = require('../helpers')
 xpath = require('../../src/xpath')
 
 describe 'xpath', ->
-  fix = null
+
+  before ->
+    fixture.setBase('test/fixtures')
 
   beforeEach ->
-    h.addFixture 'xpath'
-    fix = h.fix()
+    fixture.load('xpath.html')
 
   afterEach ->
-    h.clearFixtures()
+    fixture.cleanup()
 
   describe '#fromNode', ->
 
@@ -19,34 +20,34 @@ describe 'xpath', ->
 
       pathToFixHTML = '/html[1]/body[1]/div[1]'
 
-      pEl = fix.getElementsByTagName('p')[0]
+      pEl = fixture.el.getElementsByTagName('p')[0]
       pPath = pathToFixHTML + '/p[1]'
       assert.equal(xpath.fromNode(pEl), pPath)
 
-      spanEl = fix.getElementsByTagName('span')[0]
+      spanEl = fixture.el.getElementsByTagName('span')[0]
       spanPath = pathToFixHTML + '/ol[1]/li[2]/span[1]'
       assert.equal(xpath.fromNode(spanEl), spanPath)
 
-      strongEl = fix.getElementsByTagName('strong')[0]
+      strongEl = fixture.el.getElementsByTagName('strong')[0]
       strongPath = pathToFixHTML + '/p[2]/strong[1]'
       assert.equal(xpath.fromNode(strongEl), strongPath)
 
     it "takes an optional parameter determining the element from which XPaths should be calculated", ->
-      ol = fix.getElementsByTagName('ol')[0]
-      li = fix.getElementsByTagName('li')[0]
+      ol = fixture.el.getElementsByTagName('ol')[0]
+      li = fixture.el.getElementsByTagName('li')[0]
       assert.deepEqual(xpath.fromNode(li, ol), '/li[1]')
 
-      span = fix.getElementsByTagName('span')[0]
+      span = fixture.el.getElementsByTagName('span')[0]
       assert.deepEqual(xpath.fromNode(span, ol), '/li[2]/span[1]')
 
   describe "#toNode()", ->
     path = "/p[2]/strong"
     it "should parse a standard xpath string", ->
-      node = xpath.toNode path, fix
+      node = xpath.toNode path, fixture.el
       strong = document.getElementsByTagName('strong')[0]
       assert.equal(node, strong)
 
     xit "should parse an standard xpath string for an xml document", ->
       $.isXMLDoc = -> true
-      node = xpath.toNode path, $fix[0]
+      node = xpath.toNode path, fixture.el
       assert.equal(node, $('strong')[0])
