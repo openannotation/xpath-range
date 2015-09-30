@@ -58,8 +58,6 @@ Util.getLastTextNodeUpTo = (n) ->
 #
 # Returns an Array of the text nodes.
 Util.getTextNodes = (node) ->
-  if not node.ownerDocument?
-    debugger
   document = node.ownerDocument
   walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false)
   nodes = (next while next = walker.nextNode())
