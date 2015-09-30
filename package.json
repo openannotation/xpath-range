@@ -12,10 +12,7 @@
     "url": "https://github.com/openannotation/xpath-range.git"
   },
   "author": "",
-  "license": {
-    "name": "MIT + GPL-3.0+ Dual License",
-    "url": "https://github.com/openannotation/xpath-range/blob/master/LICENSE"
-  },
+  "license": "(MIT OR GPL-3.0)",
   "bugs": {
     "url": "https://github.com/openannotation/xpath-range/issues"
   },
