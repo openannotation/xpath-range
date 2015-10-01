@@ -71,16 +71,15 @@ Util.getTextNodes = (node) ->
 
 # Public: decides whether node A is an ancestor of node B.
 #
-# This function purposefully ignores the native browser function for this,
-# because it acts weird in PhantomJS.
-# Issue: https://github.com/ariya/phantomjs/issues/11479
-Util.contains = (parent, child) ->
-  node = child
-  while node?
-    if node is parent then return true
-    node = node.parentNode
-  return false
-
+# Unfortunately Node.contains() is broken in some WebKit versions. Instead,
+# use Node.compareDocumentPosition() and only fall back to Node.contains if
+# it is not available.
+Util.contains =
+  if document.compareDocumentPosition?
+    (a, b) -> a.compareDocumentPosition(b) &
+      Node.DOCUMENT_POSITION_CONTAINED_BY
+  else
+    (a, b) -> a.contains(b)
 
 # Export Util object
 module.exports = Util

@@ -5,29 +5,6 @@ Util = require('./util')
 
 Range = {}
 
-# Unfortunately Node.contains() is broken in Safari 5.1.5 (7534.55.3)
-# and presumably other earlier versions of WebKit. In particular, in a
-# document like
-#
-#   <p>Hello</p>
-#
-# the code
-#
-#   p = document.getElementsByTagName('p')[0]
-#   p.contains(p.firstChild)
-#
-# returns `false`. Yay.
-#
-# So instead, we use Node.compareDocumentPosition() and only fall back
-# to Node.contains if necessary.
-
-contains =
-  if document.compareDocumentPosition?
-    (a, b) -> a.compareDocumentPosition(b) &
-      Node.DOCUMENT_POSITION_CONTAINED_BY
-  else
-    (a, b) -> a.contains(b)
-
 # Public: Determines the type of Range of the provided object and returns
 # a suitable Range instance.
 #
@@ -215,19 +192,19 @@ class Range.NormalizedRange
   #
   # Returns updated self or null.
   limit: (bounds) ->
-    if @commonAncestor == bounds or contains(bounds, @commonAncestor)
+    if @commonAncestor == bounds or Util.contains(bounds, @commonAncestor)
       return this
 
-    if not contains(@commonAncestor, bounds)
+    if not Util.contains(@commonAncestor, bounds)
       return null
 
     document = bounds.ownerDocument
 
-    if not contains(bounds, @start)
+    if not Util.contains(bounds, @start)
       w = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT, null, false)
       @start = w.firstChild()
 
-    if not contains(bounds, @end)
+    if not Util.contains(bounds, @end)
       w = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT, null, false)
       @end = w.lastChild()
 
@@ -375,7 +352,7 @@ class Range.SerializedRange
       else
         endContainer = range.endContainer
 
-      if contains(node, endContainer)
+      if Util.contains(node, endContainer)
         range.commonAncestorContainer = node
         break
 
