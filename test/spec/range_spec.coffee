@@ -84,15 +84,9 @@ describe 'Range', ->
         assert.equal(norm.end.data, 'i')
 
       it "should raise Range.RangeError if it cannot normalize the range", ->
-        check = false
         root = document.createElement('div')
-        try
-          r.normalize(root)
-        catch e
-          if e instanceof Range.RangeError
-            check = true
-
-        assert.isTrue(check)
+        check = -> r.normalize(root)
+        assert.throw(check, Range.RangeError)
 
     it "serialize() returns a serialized range", ->
       seri = r.serialize(fixture.el)
