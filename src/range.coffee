@@ -27,9 +27,14 @@ Range.sniff = (r) ->
   else
     false
 
-class Range.RangeError extends Error
+class Range.RangeError
   constructor: (@type, @message, @parent = null) ->
-    super(@message)
+    @stack = (new Error()).stack
+
+  # The Error built-in cannot be invoked with .apply() so we can't use super.
+  @:: = new Error
+  @::constructor = @
+
 
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
 class Range.BrowserRange
