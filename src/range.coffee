@@ -224,12 +224,12 @@ class Range.NormalizedRange
     document = bounds.ownerDocument
 
     if not contains(bounds, @start)
-      walker = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT)
-      @start = walker.firstChild()
+      w = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT, null, false)
+      @start = w.firstChild()
 
     if not contains(bounds, @end)
-      walker = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT)
-      @end = walker.lastChild()
+      w = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT, null, false)
+      @end = w.lastChild()
 
     return null unless @start and @end
 
