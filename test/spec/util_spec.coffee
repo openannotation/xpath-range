@@ -2,9 +2,6 @@ Util = require('../../src/util')
 
 describe 'Util.getTextNodes()', ->
 
-  before ->
-    fixture.setBase('test/fixtures')
-
   beforeEach ->
     fixture.load('textnodes.html')
 

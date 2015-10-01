@@ -3,9 +3,6 @@ xpath = require('../../src/xpath')
 
 describe 'xpath', ->
 
-  before ->
-    fixture.setBase('test/fixtures')
-
   beforeEach ->
     fixture.load('xpath.html')
 

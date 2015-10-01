@@ -36,9 +36,6 @@ describe 'Range', ->
   r = null
   mockSelection = null
 
-  before ->
-    fixture.setBase('test/fixtures')
-
   beforeEach ->
     fixture.load('range.html')
     mockSelection = (ii) -> new MockSelection(fixture.el, testData[ii])

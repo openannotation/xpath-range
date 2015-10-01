@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: 'test',
 
 
     // frameworks to use
@@ -15,9 +15,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/*.coffee',
-      'test/fixtures/*.html',
-      'test/spec/*.coffee'
+      'spec/fixtures/*.html',
+      'spec/*.coffee'
     ],
 
 
