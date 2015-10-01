@@ -1,10 +1,5 @@
 Util = require('./util')
 
-# Taken from jQuery
-isXML = (elem) ->
-  documentElement = elem and (elem.ownerDocument or elem).documentElement
-  return documentElement and documentElement.nodeName isnt 'HTML' or false
-
 
 evaluateXPath = (xp, root = document, nsResolver = null) ->
   try
@@ -113,7 +108,7 @@ fromNode = (node, relativeRoot = document) ->
 #
 # Returns the Node if found otherwise null.
 toNode = (path, root = document) ->
-  if not isXML document.documentElement
+  if not Util.isXML document.documentElement
     evaluateXPath path, root
   else
     # We're in an XML document, create a namespace resolver function to try

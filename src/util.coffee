@@ -16,6 +16,12 @@ Util.NodeTypes =
   DOCUMENT_FRAGMENT_NODE: 11
   NOTATION_NODE: 12
 
+# Public: determine if the element belongs to an XML document.
+# Taken from jQuery
+Util.isXML = (elem) ->
+  documentElement = elem and (elem.ownerDocument or elem).documentElement
+  return documentElement and documentElement.nodeName isnt 'HTML' or false
+
 # Public: determine the first text node in or after the given node.
 Util.getFirstTextNodeNotBefore = (n) ->
   switch n.nodeType

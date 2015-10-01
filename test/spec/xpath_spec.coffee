@@ -1,4 +1,5 @@
 h = require('../helpers')
+Util = require('../../src/util')
 xpath = require('../../src/xpath')
 
 describe 'xpath', ->
@@ -45,9 +46,18 @@ describe 'xpath', ->
     it "should parse a standard xpath string", ->
       node = xpath.toNode path, fixture.el
       strong = document.getElementsByTagName('strong')[0]
-      assert.equal(node, strong)
+      assert.strictEqual(node, strong)
 
-    xit "should parse an standard xpath string for an xml document", ->
-      $.isXMLDoc = -> true
-      node = xpath.toNode path, fixture.el
-      assert.equal(node, $('strong')[0])
+    describe "on XML documents", ->
+      sandbox = sinon.sandbox.create()
+
+      before ->
+        sandbox.stub(Util, 'isXML').returns(true)
+
+      after ->
+        sandbox.restore()
+
+      it "should parse an standard xpath string", ->
+        node = xpath.toNode path, fixture.el
+        expected = fixture.el.getElementsByTagName('strong')[0]
+        assert.strictEqual(node, expected)
