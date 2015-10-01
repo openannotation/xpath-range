@@ -120,16 +120,14 @@ describe 'Range', ->
 
     it "normalize() returns a normalized range", ->
       norm = r.normalize()
-      assert.equal(norm.start, norm.end)
-      assert.equal(h.textInNormedRange(norm), 'habitant morbi')
+      assert.instanceOf(norm, Range.NormalizedRange)
 
     testBrowserRange = (i) ->
       ->
         sel   = mockSelection(i)
         range = new Range.BrowserRange(sel.getRangeAt(0))
         norm  = range.normalize(fixture.el)
-
-        assert.equal(h.textInNormedRange(norm), sel.expectation)
+        assert.equal(norm.text(), sel.expectation)
 
     for i in [0...testData.length]
       it "should parse test range #{i} (#{testData[i][5]})", testBrowserRange(i)
