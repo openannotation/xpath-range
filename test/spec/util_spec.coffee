@@ -1,4 +1,3 @@
-h = require('../helpers')
 Util = require('../../src/util')
 
 describe 'Util.getTextNodes()', ->

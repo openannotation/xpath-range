@@ -1,4 +1,4 @@
-h = require('../helpers')
+MockSelection = require('../mock-selection')
 
 Range = require('../../src/range')
 Util = require('../../src/util')
@@ -41,7 +41,7 @@ describe 'Range', ->
 
   beforeEach ->
     fixture.load('range.html')
-    mockSelection = (ii) -> new h.MockSelection(fixture.el, testData[ii])
+    mockSelection = (ii) -> new MockSelection(fixture.el, testData[ii])
 
   afterEach ->
     fixture.cleanup()

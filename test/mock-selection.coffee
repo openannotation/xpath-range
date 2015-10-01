@@ -1,7 +1,7 @@
 xpath = require('../src/xpath')
 Util = require('../src/util')
 
-class MockSelection
+module.exports = class MockSelection
   rangeCount: 0
   isCollapsed: false
 
@@ -50,5 +50,3 @@ class MockSelection
 
   resolveXPath: (xpath) ->
     document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-
-exports.MockSelection = MockSelection
