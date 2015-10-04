@@ -92,43 +92,16 @@ nodeStep = (node) ->
 #     # Do something with the node.
 #
 # Returns the Node if found otherwise null.
-toNode = (path, root = document) ->
-  if not Util.isXML document.documentElement
-    evaluateXPath path, root
-  else
-    # We're in an XML document, create a namespace resolver function to try
-    # and resolve any namespaces in the current document.
-    # https://developer.mozilla.org/en/DOM/document.createNSResolver
-    customResolver = document.createNSResolver(
-      if document.ownerDocument == null
-        document.documentElement
-      else
-        document.ownerDocument.documentElement
-    )
-    node = evaluateXPath path, root, customResolver
+toNode = (path, root = document, resolver = null) ->
+  if document.lookupNamespaceURI(null)? and not resolver?
+    documentElement = document.documentElement
 
-    unless node
-      # If the previous search failed to find a node then we must try to
-      # provide a custom namespace resolver to take into account the default
-      # namespace. We also prefix all node names with a custom xhtml namespace
-      # eg. 'div' => 'xhtml:div'.
-      path = (for segment in path.split '/'
-        if segment and segment.indexOf(':') == -1
-          segment.replace(/^([a-z]+)/, 'xhtml:$1')
-        else segment
-      ).join('/')
+    if document.ownerDocument?
+      documentElement = document.ownerDocument.documentElement
 
-      # Find the default document namespace.
-      namespace = document.lookupNamespaceURI null
+    resolver = document.createNSResolver(documentElement)
 
-      # Try and resolve the namespace, first seeing if it is an xhtml node
-      # otherwise check the head attributes.
-      customResolver  = (ns) ->
-        if ns == 'xhtml' then namespace
-        else document.documentElement.getAttribute('xmlns:' + ns)
-
-      node = evaluateXPath path, root, customResolver
-    node
+  return evaluateXPath(path, root, resolver)
 
 module.exports =
   fromNode: fromNode
