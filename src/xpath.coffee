@@ -29,33 +29,19 @@ evaluateXPath = (xp, root = document, nsResolver = null) ->
       node = findChild node, name.toLowerCase(), idx
     node
 
-# Get xpath string to the provided node relative to the provided root
+# Public: Compute an XPath expression for the given node.
 #
-# relativeRoot - A jQuery object of the nodes whose xpaths are requested.
+# root - The root context of the XPath.
 #
 # Returns String
-simpleXPathPure = (node, relativeRoot) ->
-
-  getPathSegment = (node) ->
-    name = getNodeName node
-    pos = getNodePosition node
-    "#{name}[#{pos}]"
-
-  rootNode = relativeRoot
-
-  getPathTo = (node) ->
-    xpath = ''
-    while node != rootNode
-      unless node?
-        throw new Error("Called getPathTo on a node which was not a descendant
-                         of @rootNode. " + rootNode)
-      xpath = (getPathSegment node) + '/' + xpath
-      node = node.parentNode
-    xpath = '/' + xpath
-    xpath = xpath.replace /\/$/, ''
-    xpath
-
-  return getPathTo(node)
+fromNode = (node, root = document) ->
+  path = ''
+  while node != root
+    unless node?
+      throw new Error("Given node is not a descendant of the root node.")
+    path = '/' + nodeStep(node) + path
+    node = node.parentNode
+  return path
 
 findChild = (node, type, index) ->
   unless node.hasChildNodes()
@@ -63,35 +49,34 @@ findChild = (node, type, index) ->
   children = node.childNodes
   found = 0
   for child in children
-    name = getNodeName child
+    name = name(child)
     if name is type
       found += 1
       if found is index
         return child
   throw new Error("XPath error: wanted child not found.")
 
-# Get the node name for use in generating an xpath expression.
-getNodeName = (node) ->
-  nodeName = node.nodeName.toLowerCase()
-  switch nodeName
+# Get the XPath node name.
+nodeName = (node) ->
+  name = node.nodeName.toLowerCase()
+  switch name
     when "#text" then return "text()"
     when "#comment" then return "comment()"
     when "#cdata-section" then return "cdata-section()"
-    else return nodeName
+    else return name
 
-# Get the index of the node as it appears in its parent's child list
-getNodePosition = (node) ->
-  pos = 0
-  tmp = node
-  while tmp
-    if tmp.nodeName is node.nodeName
-      pos += 1
-    tmp = tmp.previousSibling
-  pos
+# Get the position of this node among its siblings of the same name.
+nodePosition = (node) ->
+  position = 1
+  name = node.nodeName
+  while node = node.previousSibling
+    if node.nodeName is name
+      position += 1
+  return position
 
-# Public: Compute an XPath expression for the given node.
-fromNode = (node, relativeRoot = document) ->
-  return simpleXPathPure node, relativeRoot
+# Make an XPath location step for the node by name and position.
+nodeStep = (node) ->
+  return "#{nodeName(node)}[#{nodePosition(node)}]"
 
 # Public: Finds an Element Node using an XPath relative to the document root.
 #
