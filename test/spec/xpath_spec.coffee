@@ -43,17 +43,3 @@ describe 'xpath', ->
       node = xpath.toNode path, fixture.el
       strong = document.getElementsByTagName('strong')[0]
       assert.strictEqual(node, strong)
-
-    describe "on XML documents", ->
-      sandbox = sinon.sandbox.create()
-
-      before ->
-        sandbox.stub(Util, 'isXML').returns(true)
-
-      after ->
-        sandbox.restore()
-
-      it "should parse an standard xpath string", ->
-        node = xpath.toNode path, fixture.el
-        expected = fixture.el.getElementsByTagName('strong')[0]
-        assert.strictEqual(node, expected)
