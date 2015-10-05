@@ -56,99 +56,106 @@ class Range.BrowserRange
     @endContainer            = obj.endContainer
     @endOffset               = obj.endOffset
 
-  # Public: normalize works around the fact that browsers don't generate
-  # ranges/selections in a consistent manner. Some (Safari) will create
-  # ranges that have (say) a textNode startContainer and elementNode
-  # endContainer. Others (Firefox) seem to only ever generate
-  # textNode/textNode or elementNode/elementNode pairs.
+  splitBoundaries: ->
+    if @endContainer.nodeType is Util.NodeTypes.TEXT_NODE
+      if 0 < @endOffset < @endContainer.length
+        if @startContainer is @endContainer
+          @endContainer = @endContainer.splitText(@endOffset)
+
+          # Handle the collapsed / inverted case.
+          if @endOffset <= @startOffset
+            @startContainer = @endContainer
+            @startOffset -= @endOffset
+
+          @endOffset = 0
+        else
+          @endContainer = @endContainer.splitText(@endOffset)
+          @endOffset = 0
+
+    if @startContainer.nodeType is Util.NodeTypes.TEXT_NODE
+      if 0 < @startOffset < @startContainer.length
+        if @startContainer is @endContainer
+          @startContainer = @startContainer.splitText(@startOffset)
+
+          # Handle the collapsed / inverted case.
+          if @startOffset <= @endOffset
+            @endContainer = @startContainer
+            @endOffset -= @startOffset
+
+          @startOffset = 0
+        else
+          @startContainer = @startContainer.splitText(@startOffset)
+          @startOffset = 0
+
+  # Public: Normalize the start and end to TextNode boundaries.
   #
   # Returns an instance of Range.NormalizedRange
   normalize: (root) ->
-    if @tainted
-      return false
-    else
-      @tainted = true
+    this.splitBoundaries()
 
-    r = {}
-    this._normalizeStart(r)
-    this._normalizeEnd(r)
+    # Initialize the result.
+    commonAncestor = @commonAncestorContainer
+    start = null
+    end = null
 
-    # Now let's start to slice & dice the text elements!
-    nr = {}
+    # Get (a copy of) the boundaries of the range.
+    {startContainer, startOffset, endContainer, endOffset} = this
 
-    if r.startOffset > 0
-      # Do we really have to cut?
-      if r.start.nodeValue.length > r.startOffset
-        # Yes. Cut.
-        nr.start = r.start.splitText(r.startOffset)
-      else
-        # Avoid splitting off zero-length pieces.
-        previousNode = r.start
-        previousNode = previousNode.parentNode until previousNode.nextSibling
-        nr.start = previousNode.nextSibling
-    else
-      nr.start = r.start
+    # Move the start container to the last leaf before any sibling boundary.
+    # All children of the start container will fall within the range.
+    # This step obviates the recursion when iterating over the text.
+    while startContainer.childNodes.length and startOffset > 0
+      startContainer = startContainer.childNodes[startOffset-1]
+      startOffset = startContainer.length or startContainer.childNodes.length
 
-    # is the whole selection inside one text element ?
-    if r.start is r.end
-      if nr.start.nodeValue.length > (r.endOffset - r.startOffset)
-        nr.start.splitText(r.endOffset - r.startOffset)
-      nr.end = nr.start
-    else # no, the end of the selection is in a separate text element
-      # does the end need to be cut?
-      if r.end.nodeValue.length > r.endOffset
-        r.end.splitText(r.endOffset)
-      nr.end = r.end
+    # Find the first TextNode.
+    node = startContainer
+    while node?
+      # Skip to the first leaf Node, since all children are included.
+      # This step substitutes for recursion, capitalizing on the preconditions.
+      while node.firstChild?
+        node = node.firstChild
 
-    # Make sure the common ancestor is an element node.
-    nr.commonAncestor = @commonAncestorContainer
-    while nr.commonAncestor.nodeType isnt Util.NodeTypes.ELEMENT_NODE
-      nr.commonAncestor = nr.commonAncestor.parentNode
+      # Terminate on the first TextNode not excluded by the offset.
+      if node.nodeType is Util.NodeTypes.TEXT_NODE
+        if not (node is startContainer and startOffset isnt 0)
+          start = node
+          break
 
-    new Range.NormalizedRange(nr)
+      # Skip to the next branch, staying within the common ancestor.
+      while not (node.nextSibling? or node is commonAncestor)
+        node = node.parentNode
 
-  _normalizeStart: (r) ->
-    # Look at the start
-    if @startContainer.nodeType is Util.NodeTypes.ELEMENT_NODE
-      # We are dealing with element nodes
-      r.start = Util.getFirstTextNodeNotBefore(
-        @startContainer.childNodes[@startOffset]
-      )
-      r.startOffset = 0
-    else
-      # We are dealing with simple text nodes
-      r.start = @startContainer
-      r.startOffset = @startOffset
+      node = node.nextSibling
 
-  _normalizeEnd: (r) ->
-    # Look at the end
-    if @endContainer.nodeType is Util.NodeTypes.ELEMENT_NODE
-      # Get specified node.
-      node = @endContainer.childNodes[@endOffset]
+    # Move the end container to the first leaf before any sibling boundary.
+    # All children of the end container will fall within the range.
+    # This step obviates the recursion when iterating over the text in reverse.
+    while endOffset < endContainer.childNodes.length
+      endContainer = endContainer.childNodes[endOffset]
+      endOffset = 0
 
-      if node? # Does that node exist?
-        # Look for a text node either at the immediate beginning of node
-        n = node
-        while n? and (n.nodeType isnt Util.NodeTypes.TEXT_NODE)
-          n = n.firstChild
-        if n? # Did we find a text node at the start of this element?
-          r.end = n
-          r.endOffset = 0
+    # Find the last TextNode.
+    node = endContainer
+    while node?
+      # Skip to the last leaf Node, since all children are included.
+      # This step substitutes for recursion, capitalizing on the preconditions.
+      while node.lastChild?
+        node = node.lastChild
 
-      unless r.end?
-        # We need to find a text node in the previous sibling of the node at the
-        # given offset, if one exists, or in the previous sibling of its
-        # container.
-        if @endOffset
-          node = @endContainer.childNodes[@endOffset - 1]
-        else
-          node = @endContainer.previousSibling
-        r.end = Util.getLastTextNodeUpTo node
-        r.endOffset = r.end.nodeValue.length
+      # Terminate on the first TextNode not excluded by the offset.
+      if node.nodeType is Util.NodeTypes.TEXT_NODE
+        if not (node is endContainer and endOffset is 0)
+          end = node
+          break
 
-    else # We are dealing with simple text nodes
-      r.end = @endContainer
-      r.endOffset = @endOffset
+      # Skip to the previous branch, staying within the common ancestor.
+      while not (node.previousSibling? or node is commonAncestor)
+        node = node.parentNode
+
+      node = node.previousSibling
+
+    return new Range.NormalizedRange({commonAncestor, start, end})
 
   # Public: Creates a range suitable for storage.
   #
@@ -171,8 +178,7 @@ class Range.NormalizedRange
   # other Range classes rather than manually.
   #
   # obj - An Object literal. Should have the following properties.
-  #       commonAncestor: A Element that encompasses both the start and end
-  #                       nodes
+  #       commonAncestor: A Node that contains the start Node and end Node.
   #       start:          The first TextNode in the range.
   #       end             The last TextNode in the range.
   #
