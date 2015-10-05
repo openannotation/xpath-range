@@ -1,33 +1,5 @@
-Util = require('./util')
-
-
-evaluateXPath = (xp, root = document, nsResolver = null) ->
-  try
-    document.evaluate(
-      '.' + xp,
-      root,
-      nsResolver,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null
-    ).singleNodeValue
-  catch exception
-    # There are cases when the evaluation fails, because the HTML documents
-    # contains nodes with invalid names, for example tags with equal signs in
-    # them, or something like that. In these cases, the XPath expressions will
-    # have these abominations, too, and then they can not be evaluated. In these
-    # cases, we get an XPathException, with error code 52. See
-    # http://www.w3.org/TR/DOM-Level-3-XPath/xpath.html#XPathException This does
-    # not necessarily make any sense, but this what we see happening.
-    #
-    # This is an 'evaluator' that should work for the simple expressions we
-    # generate.
-    steps = xp.substring(1).split("/")
-    node = root
-    for step in steps
-      [name, idx] = step.split "["
-      idx = if idx? then parseInt (idx?.split "]")[0] else 1
-      node = findChild node, name.toLowerCase(), idx
-    node
+FIRST_ORDERED_NODE_TYPE = 9
+HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
 # Public: Compute an XPath expression for the given node.
 #
@@ -35,48 +7,14 @@ evaluateXPath = (xp, root = document, nsResolver = null) ->
 #
 # Returns String
 fromNode = (node, root = document) ->
-  path = ''
-  while node != root
+  path = '/'
+  while node isnt root
     unless node?
       throw new Error("Given node is not a descendant of the root node.")
-    path = '/' + nodeStep(node) + path
+    path = "/#{nodeName(node)}[#{nodePosition(node)}]#{path}"
     node = node.parentNode
-  return path
+  return path.replace(/\/$/, '')
 
-findChild = (node, type, index) ->
-  unless node.hasChildNodes()
-    throw new Error("XPath error: node has no children!")
-  children = node.childNodes
-  found = 0
-  for child in children
-    name = name(child)
-    if name is type
-      found += 1
-      if found is index
-        return child
-  throw new Error("XPath error: wanted child not found.")
-
-# Get the XPath node name.
-nodeName = (node) ->
-  name = node.nodeName.toLowerCase()
-  switch name
-    when "#text" then return "text()"
-    when "#comment" then return "comment()"
-    when "#cdata-section" then return "cdata-section()"
-    else return name
-
-# Get the position of this node among its siblings of the same name.
-nodePosition = (node) ->
-  position = 1
-  name = node.nodeName
-  while node = node.previousSibling
-    if node.nodeName is name
-      position += 1
-  return position
-
-# Make an XPath location step for the node by name and position.
-nodeStep = (node) ->
-  return "#{nodeName(node)}[#{nodePosition(node)}]"
 
 # Public: Finds an Element Node using an XPath relative to the document root.
 #
@@ -92,16 +30,68 @@ nodeStep = (node) ->
 #     # Do something with the node.
 #
 # Returns the Node if found otherwise null.
-toNode = (path, root = document, resolver = null) ->
-  if document.lookupNamespaceURI(null)? and not resolver?
-    documentElement = document.documentElement
+toNode = (path, root = document, resolver) ->
+  # Make the path relative to the root, if not the document.
+  if root isnt document and path[0] is '/' and path[1] isnt '/'
+    path = '.' + path
 
-    if document.ownerDocument?
-      documentElement = document.ownerDocument.documentElement
+  # Make a default resolver.
+  if resolver is undefined
+    documentElement = (root.ownerDocument or root).documentElement
+    defaultNS = documentElement.lookupNamespaceURI(null) or HTML_NAMESPACE
+    resolver = (prefix) ->
+      ns = {'_default_': defaultNS}
+      return ns[prefix] or documentElement.lookupNamespaceURI(prefix)
 
-    resolver = document.createNSResolver(documentElement)
+    # Add a default prefix to each path part.
+    path = path.replace(/\/(?!\.)([^\/:]+)(?=\/|$)/g, '/_default_:$1')
 
-  return evaluateXPath(path, root, resolver)
+  try
+    r = document.evaluate(path, root, resolver, FIRST_ORDERED_NODE_TYPE, null)
+    return r.singleNodeValue
+  catch
+    # Fallback approach in case of no document.evaluate() or another error.
+    # This approach works for the simple expressions this module generates.
+    steps = path.split("/")
+    node = root
+    while node?
+      step = steps.shift()
+      if step is undefined then break
+      if step is '.' then continue
+      [name, position] = step.split(/[\[\]]/)
+      name = name.replace(/^_default_:/g, '')
+      position = if position? then parseInt(position) else 1
+      node = findChild(node, name, position)
+    return node
+
+
+# Get the XPath node name.
+nodeName = (node) ->
+  name = node.nodeName
+  switch name
+    when "#text" then name = "text()"
+    when "#comment" then name = "comment()"
+    when "#cdata-section" then name = "cdata-section()"
+    else name = name.toLowerCase()
+
+
+# Get the ordinal position of this node among its siblings of the same name.
+nodePosition = (node) ->
+  name = node.nodeName
+  position = 1
+  while node = node.previousSibling
+    if node.nodeName is name
+      position += 1
+  return position
+
+
+# Find the child of the given node by name and ordinal position.
+findChild = (node, name, position) ->
+  for node in node.childNodes
+    if nodeName(node) is name and --position is 0
+      return node
+  return null
+
 
 module.exports =
   fromNode: fromNode
