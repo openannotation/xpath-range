@@ -60,9 +60,9 @@ class Range.BrowserRange
     if @endContainer.nodeType is Util.NodeTypes.TEXT_NODE
       if 0 < @endOffset < @endContainer.length
         if @startContainer is @endContainer
+          @commonAncestorContainer = @endContainer.parentNode
           @endContainer = @endContainer.splitText(@endOffset)
 
-          # Handle the collapsed / inverted case.
           if @endOffset <= @startOffset
             @startContainer = @endContainer
             @startOffset -= @endOffset
@@ -74,10 +74,13 @@ class Range.BrowserRange
 
     if @startContainer.nodeType is Util.NodeTypes.TEXT_NODE
       if 0 < @startOffset < @startContainer.length
+        if @commonAncestorContainer is @startContainer
+          @commonAncestorContainer = @commonAncestorContainer.parentNode
+
         if @startContainer is @endContainer
+          @commonAncestorContainer = @startContainer.parentNode
           @startContainer = @startContainer.splitText(@startOffset)
 
-          # Handle the collapsed / inverted case.
           if @startOffset <= @endOffset
             @endContainer = @startContainer
             @endOffset -= @startOffset
@@ -94,9 +97,14 @@ class Range.BrowserRange
     this.splitBoundaries()
 
     # Initialize the result.
-    commonAncestor = @commonAncestorContainer
+    commonAncestor = null
     start = null
     end = null
+
+    # Find a common ancestor Element.
+    commonAncestor = @commonAncestorContainer
+    while commonAncestor.nodeType isnt Util.NodeTypes.ELEMENT_NODE
+      commonAncestor = commonAncestor.parentNode
 
     # Get (a copy of) the boundaries of the range.
     {startContainer, startOffset, endContainer, endOffset} = this

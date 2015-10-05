@@ -26,16 +26,13 @@ Util.getTextNodes = (node) ->
   return nodes
 
 # Public: decides whether node A is an ancestor of node B.
-#
-# Unfortunately Node.contains() is broken in some WebKit versions. Instead,
-# use Node.compareDocumentPosition() and only fall back to Node.contains if
-# it is not available.
-Util.contains =
+Util.contains = (a, b) ->
+  if a is b then return true
+  # Node.contains() is sometimes broken so prefer compareDocumentPosition.
   if document.compareDocumentPosition?
-    (a, b) -> a.compareDocumentPosition(b) &
-      Node.DOCUMENT_POSITION_CONTAINED_BY
+    return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_CONTAINED_BY
   else
-    (a, b) -> a.contains(b)
+    return a.contains(b)
 
 # Export Util object
 module.exports = Util
