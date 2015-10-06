@@ -198,12 +198,20 @@ class Range.NormalizedRange
     document = bounds.ownerDocument
 
     if not Util.contains(bounds, @start)
-      w = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT, null, false)
-      @start = w.firstChild()
+      node = bounds
+      while node? and node = firstLeaf(node)
+        if node.nodeType is Util.NodeTypes.TEXT_NODE
+          break
+        node = node.nextBranch(bounds, node)
+      @start = node
 
     if not Util.contains(bounds, @end)
-      w = document.createTreeWalker(bounds, NodeFilter.SHOW_TEXT, null, false)
-      @end = w.lastChild()
+      node = bounds
+      while node? and node = lastLeaf(node)
+        if node.nodeType is Util.NodeTypes.TEXT_NODE
+          break
+        node = node.previousBranch(bounds, node)
+      @end = node
 
     return null unless @start and @end
 
