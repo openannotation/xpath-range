@@ -1,4 +1,3 @@
-Util = require('../../src/util')
 xpath = require('../../src/xpath')
 
 describe 'xpath', ->
