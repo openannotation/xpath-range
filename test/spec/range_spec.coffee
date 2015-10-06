@@ -1,7 +1,5 @@
 MockSelection = require('../mock-selection')
-
 Range = require('../../src/range')
-Util = require('../../src/util')
 
 testData = [
   [ '/p/strong/text()', 13,  '/p/strong/text()', 27, "habitant morbi",                                     "Partial node contents." ]
@@ -233,3 +231,73 @@ describe 'Range', ->
           end: paraText2
         })
         assert.equal(range.limit(otherDiv), null)
+
+    describe 'textNodes', ->
+
+      beforeEach ->
+        fixture.load('textnodes.html')
+
+      afterEach ->
+        fixture.cleanup()
+
+      it "returns an element's textNode descendants", ->
+        range = new Range.BrowserRange({
+          commonAncestorContainer: fixture.el
+          startContainer: fixture.el
+          startOffset: 0
+          endContainer: fixture.el
+          endOffset: fixture.el.childNodes.length
+        })
+
+        normedRange = range.normalize(fixture.el)
+        nodes = normedRange.textNodes()
+        text = (node.nodeValue for node in nodes)
+
+        expectation = [ '\n  '
+                      , 'lorem ipsum'
+                      , '\n  '
+                      , 'dolor sit'
+                      , '\n'
+                      , 'dolor sit '
+                      , 'amet'
+                      , '. humpty dumpty. etc.'
+                      ]
+
+        assert.deepEqual(text, expectation)
+
+      it "returns an element's TextNodes after Text.splitText() text has been called", ->
+        # Build a very csutom fixture to replicate an issue in IE9 where calling
+        # split text on an text node does not update the parents .childNodes value
+        # which continues to return the unsplit text node.
+        fixture.cleanup()
+
+        para = document.createElement('p')
+        text = document.createTextNode('this is a paragraph of text')
+        para.appendChild(text)
+        fixture.el.appendChild(para)
+
+        assert.lengthOf(para.childNodes, 1)
+        first = text.splitText(14)
+
+        # Some basic assertions on the split text.
+        assert.equal(first.nodeValue, 'graph of text')
+        assert.equal(text.nodeValue, 'this is a para')
+        assert.equal(para.firstChild.nodeValue, 'this is a para')
+        assert.equal(para.lastChild.nodeValue, 'graph of text')
+
+        # Both of the following tests fail in IE9 so we cannot rely on the
+        # Text.childNodes property or jQuery.fn.contents() to retrieve the text
+        # nodes.
+        # assert.lengthOf(para.childNodes, 2)
+        # assert.lengthOf($(para).contents(), 2)
+
+        range = new Range.BrowserRange({
+          commonAncestorContainer: para,
+          startContainer: para,
+          startOffset: 0,
+          endContainer: para,
+          endOffset: para.childNodes.length
+        })
+        normedRange = range.normalize(para)
+        textNodes = normedRange.textNodes()
+        assert.lengthOf(textNodes, 2)

@@ -16,14 +16,6 @@ Util.NodeTypes =
   DOCUMENT_FRAGMENT_NODE: 11
   NOTATION_NODE: 12
 
-# Public: Find all text nodes within the given node.
-#
-# Returns an Array of the text nodes.
-Util.getTextNodes = (node) ->
-  document = node.ownerDocument
-  walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false)
-  nodes = (next while next = walker.nextNode())
-  return nodes
 
 # Public: decides whether node A is an ancestor of node B.
 Util.contains = (a, b) ->

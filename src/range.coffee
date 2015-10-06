@@ -232,7 +232,7 @@ class Range.NormalizedRange
         origParent = node.parentNode
 
       path = xpath.fromNode(origParent, root)
-      textNodes = Util.getTextNodes(origParent)
+      textNodes = getTextNodes(origParent)
 
       # Calculate real offset as the combined length of all the
       # preceding textNode siblings. We include the length of the
@@ -269,7 +269,7 @@ class Range.NormalizedRange
   #
   # Returns an Array of TextNode instances.
   textNodes: ->
-    textNodes = Util.getTextNodes(this.commonAncestor)
+    textNodes = getTextNodes(this.commonAncestor)
     [start, end] = [textNodes.indexOf(this.start), textNodes.indexOf(this.end)]
     # Return the textNodes that fall between the start and end indexes.
     return textNodes[start..end]
@@ -326,7 +326,7 @@ class Range.SerializedRange
       # Target the string index of the last character inside the range.
       if p is 'end' then targetOffset -= 1
 
-      for tn in Util.getTextNodes(node)
+      for tn in getTextNodes(node)
         if (length + tn.nodeValue.length > targetOffset)
           range[p + 'Container'] = tn
           range[p + 'Offset'] = this[p + 'Offset'] - length
@@ -399,6 +399,16 @@ previousBranch = (root, node) ->
     if node.previousSibling? then return node.previousSibling
     node = node.parentNode
   return null
+
+
+getTextNodes = (root) ->
+  text = []
+  node = root
+  while node? and node = firstLeaf(node)
+    if node.nodeType is Util.NodeTypes.TEXT_NODE
+      text.push(node)
+    node = nextBranch(root, node)
+  return text
 
 
 # Export Range object.
