@@ -1,5 +1,8 @@
+DOMException = require('./dom-exception')
+
 FIRST_ORDERED_NODE_TYPE = 9
 HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
+
 
 # Public: Compute an XPath expression for the given node.
 #
@@ -10,7 +13,9 @@ fromNode = (node, root = document) ->
   path = '/'
   while node isnt root
     unless node?
-      throw new Error("Given node is not a descendant of the root node.")
+      message = 'The supplied node is not contained by the root node.'
+      name = 'InvalidNodeTypeError'
+      throw new DOMException(message, name)
     path = "/#{nodeName(node)}[#{nodePosition(node)}]#{path}"
     node = node.parentNode
   return path.replace(/\/$/, '')

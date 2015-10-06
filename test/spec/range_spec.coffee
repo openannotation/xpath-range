@@ -83,10 +83,15 @@ describe 'Range', ->
         norm = r.normalize(fixture.el)
         assert.equal(norm.end.data, 'i')
 
-      it "should raise Range.RangeError if it cannot normalize the range", ->
+      it "should raise NotFoundError if a node cannot be found", ->
         root = document.createElement('div')
         check = -> r.normalize(root)
-        assert.throw(check, Range.RangeError)
+        assert.throw(check, 'NotFoundError')
+
+      it "should raise IndexSizeError if an offset is too large", ->
+        range.endOffset = 1000
+        check = -> range.normalize(fixture.el)
+        assert.throw(check, 'IndexSizeError')
 
     it "serialize() returns a serialized range", ->
       seri = r.serialize(fixture.el)

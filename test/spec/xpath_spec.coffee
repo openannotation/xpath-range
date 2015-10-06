@@ -36,6 +36,11 @@ describe 'xpath', ->
       span = fixture.el.getElementsByTagName('span')[0]
       assert.deepEqual(xpath.fromNode(span, ol), '/li[2]/span[1]')
 
+    it 'should raise InvalidNodeTypeError if root does not contain node', ->
+      node = document.createElement('div')
+      check = -> xpath.fromNode(node, fixture.el)
+      assert.throw(check, 'InvalidNodeTypeError')
+
   describe "#toNode()", ->
     path = "/p[2]/strong"
     it "should parse a standard xpath string", ->

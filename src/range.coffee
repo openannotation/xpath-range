@@ -1,6 +1,8 @@
 ancestors = require('ancestors')
 contains = require('node-contains')
 matches = require('matches-selector')
+
+DOMException = require('./dom-exception')
 xpath = require('./xpath')
 
 # https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
@@ -8,14 +10,6 @@ ELEMENT_NODE = 1
 TEXT_NODE = 3
 
 Range = {}
-
-class Range.RangeError
-  constructor: (@type, @message, @parent = null) ->
-    @stack = (new Error()).stack
-
-  # The Error built-in cannot be invoked with .apply() so we can't use super.
-  @:: = new Error
-  @::constructor = @
 
 
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
@@ -287,17 +281,12 @@ class Range.SerializedRange
     range = {}
 
     for p in ['start', 'end']
-      try
-        node = xpath.toNode(this[p], root)
-      catch e
-        throw new Range.RangeError(
-          p,
-          "Error while finding #{p} node: #{this[p]}: " + e,
-          e
-        )
+      node = xpath.toNode(this[p], root)
 
-      if not node
-        throw new Range.RangeError(p, "Couldn't find #{p} node: #{this[p]}")
+      if not node?
+        message = 'Node was not found.'
+        name = 'NotFoundError'
+        throw new DOMException(message, name)
 
       # Unfortunately, we *can't* guarantee only one textNode per
       # elementNode, so we have to walk along the element's textNodes until
@@ -322,10 +311,9 @@ class Range.SerializedRange
       # 'startOffset'/'endOffset', the element has shorter content than when
       # we annotated, so throw an error:
       if not range[p + 'Offset']?
-        throw new Range.RangeError(
-          "#{p}offset",
-          "Couldn't find offset #{this[p + 'Offset']} in element #{this[p]}"
-        )
+        message = "There is no text at offset #{this[p + 'Offset']}."
+        name = "IndexSizeError"
+        throw new DOMException(message, name)
 
     for node in ancestors(range.startContainer)
       if range.endContainer.nodeType == TEXT_NODE
