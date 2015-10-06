@@ -17,14 +17,5 @@ Util.NodeTypes =
   NOTATION_NODE: 12
 
 
-# Public: decides whether node A is an ancestor of node B.
-Util.contains = (a, b) ->
-  if a is b then return true
-  # Node.contains() is sometimes broken so prefer compareDocumentPosition.
-  if document.compareDocumentPosition?
-    return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_CONTAINED_BY
-  else
-    return a.contains(b)
-
 # Export Util object
 module.exports = Util

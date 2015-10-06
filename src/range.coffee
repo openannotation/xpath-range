@@ -1,4 +1,5 @@
 ancestors = require('ancestors')
+contains = require('node-contains')
 matches = require('matches-selector')
 xpath = require('./xpath')
 Util = require('./util')
@@ -189,15 +190,15 @@ class Range.NormalizedRange
   #
   # Returns updated self or null.
   limit: (bounds) ->
-    if @commonAncestor == bounds or Util.contains(bounds, @commonAncestor)
+    if @commonAncestor == bounds or contains(bounds, @commonAncestor)
       return this
 
-    if not Util.contains(@commonAncestor, bounds)
+    if not contains(@commonAncestor, bounds)
       return null
 
     document = bounds.ownerDocument
 
-    if not Util.contains(bounds, @start)
+    if not contains(bounds, @start)
       node = bounds
       while node? and node = firstLeaf(node)
         if node.nodeType is Util.NodeTypes.TEXT_NODE
@@ -205,7 +206,7 @@ class Range.NormalizedRange
         node = node.nextBranch(bounds, node)
       @start = node
 
-    if not Util.contains(bounds, @end)
+    if not contains(bounds, @end)
       node = bounds
       while node? and node = lastLeaf(node)
         if node.nodeType is Util.NodeTypes.TEXT_NODE
@@ -357,7 +358,7 @@ class Range.SerializedRange
       else
         endContainer = range.endContainer
 
-      if Util.contains(node, endContainer)
+      if contains(node, endContainer)
         range.commonAncestorContainer = node
         break
 

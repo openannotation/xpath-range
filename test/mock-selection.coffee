@@ -1,5 +1,5 @@
+contains = require('node-contains')
 xpath = require('../src/xpath')
-Util = require('../src/util')
 
 module.exports = class MockSelection
   rangeCount: 0
@@ -18,7 +18,7 @@ module.exports = class MockSelection
     @description    = data[5]
 
     @commonAncestor = @startContainer
-    while not Util.contains(@commonAncestor, @endContainer)
+    while not contains(@commonAncestor, @endContainer)
       @commonAncestor = @commonAncestor.parentNode
     @commonAncestorXPath = xpath.fromNode(@commonAncestor)
 
