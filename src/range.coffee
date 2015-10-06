@@ -2,7 +2,10 @@ ancestors = require('ancestors')
 contains = require('node-contains')
 matches = require('matches-selector')
 xpath = require('./xpath')
-Util = require('./util')
+
+# https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
+ELEMENT_NODE = 1
+TEXT_NODE = 3
 
 Range = {}
 
@@ -58,7 +61,7 @@ class Range.BrowserRange
     @endOffset               = obj.endOffset
 
   splitBoundaries: ->
-    if @endContainer.nodeType is Util.NodeTypes.TEXT_NODE
+    if @endContainer.nodeType is TEXT_NODE
       if 0 < @endOffset < @endContainer.length
         if @startContainer is @endContainer
           @commonAncestorContainer = @endContainer.parentNode
@@ -73,7 +76,7 @@ class Range.BrowserRange
           @endContainer = @endContainer.splitText(@endOffset)
           @endOffset = 0
 
-    if @startContainer.nodeType is Util.NodeTypes.TEXT_NODE
+    if @startContainer.nodeType is TEXT_NODE
       if 0 < @startOffset < @startContainer.length
         if @commonAncestorContainer is @startContainer
           @commonAncestorContainer = @commonAncestorContainer.parentNode
@@ -104,7 +107,7 @@ class Range.BrowserRange
 
     # Find a common ancestor Element.
     commonAncestor = @commonAncestorContainer
-    while commonAncestor.nodeType isnt Util.NodeTypes.ELEMENT_NODE
+    while commonAncestor.nodeType isnt ELEMENT_NODE
       commonAncestor = commonAncestor.parentNode
 
     # Get (a copy of) the boundaries of the range.
@@ -119,7 +122,7 @@ class Range.BrowserRange
     # Find the first TextNode not excluded by the start offset.
     node = startContainer
     while node? and node = firstLeaf(node)
-      if node.nodeType is Util.NodeTypes.TEXT_NODE
+      if node.nodeType is TEXT_NODE
         if not (node is startContainer and startOffset isnt 0)
           start = node
           break
@@ -135,7 +138,7 @@ class Range.BrowserRange
     # Find the last TextNode not excluded by the end offset.
     node = endContainer
     while node? and node = lastLeaf(node)
-      if node.nodeType is Util.NodeTypes.TEXT_NODE
+      if node.nodeType is TEXT_NODE
         if not (node is endContainer and endOffset is 0)
           end = node
           break
@@ -201,7 +204,7 @@ class Range.NormalizedRange
     if not contains(bounds, @start)
       node = bounds
       while node? and node = firstLeaf(node)
-        if node.nodeType is Util.NodeTypes.TEXT_NODE
+        if node.nodeType is TEXT_NODE
           break
         node = node.nextBranch(bounds, node)
       @start = node
@@ -209,7 +212,7 @@ class Range.NormalizedRange
     if not contains(bounds, @end)
       node = bounds
       while node? and node = lastLeaf(node)
-        if node.nodeType is Util.NodeTypes.TEXT_NODE
+        if node.nodeType is TEXT_NODE
           break
         node = node.previousBranch(bounds, node)
       @end = node
@@ -353,7 +356,7 @@ class Range.SerializedRange
         )
 
     for node in ancestors(range.startContainer)
-      if range.endContainer.nodeType == Util.NodeTypes.TEXT_NODE
+      if range.endContainer.nodeType == TEXT_NODE
         endContainer = range.endContainer.parentNode
       else
         endContainer = range.endContainer
@@ -414,7 +417,7 @@ getTextNodes = (root) ->
   text = []
   node = root
   while node? and node = firstLeaf(node)
-    if node.nodeType is Util.NodeTypes.TEXT_NODE
+    if node.nodeType is TEXT_NODE
       text.push(node)
     node = nextBranch(root, node)
   return text
