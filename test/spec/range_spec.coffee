@@ -1,5 +1,17 @@
-MockSelection = require('../mock-selection')
 Range = require('../../src/range')
+xpath = require('../../src/xpath')
+
+createRange = (i) ->
+  data = testData[i]
+  startContainer = xpath.toNode(data[0], fixture.el)
+  startOffset    = data[1]
+  endContainer   = xpath.toNode(data[2], fixture.el)
+  endOffset      = data[3]
+
+  range = document.createRange()
+  range.setStart(startContainer, startOffset)
+  range.setEnd(endContainer, endOffset)
+  return range
 
 testData = [
   [ '/p/strong/text()', 13,  '/p/strong/text()', 27, "habitant morbi",                                     "Partial node contents." ]
@@ -33,19 +45,17 @@ testData = [
 ]
 
 describe 'Range', ->
-  r = null
-  mockSelection = null
+  range = null
 
   beforeEach ->
     fixture.load('range.html')
-    mockSelection = (ii) -> new MockSelection(fixture.el, testData[ii])
 
   afterEach ->
     fixture.cleanup()
 
   describe "SerializedRange", ->
     beforeEach ->
-      r = new Range.SerializedRange
+      range = new Range.SerializedRange
         start: "/p/strong"
         startOffset: 13
         end: "/p/strong"
@@ -53,13 +63,13 @@ describe 'Range', ->
 
     describe "normalize", ->
       it "should return a normalized range", ->
-        norm = r.normalize(fixture.el)
+        norm = range.normalize(fixture.el)
         assert.isTrue(norm instanceof Range.NormalizedRange)
         assert.equal(norm.text(), "habitant morbi")
 
       it "should return a normalized range with 0 offsets", ->
-        r.startOffset = 0
-        norm = r.normalize(fixture.el)
+        range.startOffset = 0
+        norm = range.normalize(fixture.el)
         assert.isTrue(norm instanceof Range.NormalizedRange)
         assert.equal(norm.text(), "Pellentesque habitant morbi")
 
@@ -70,7 +80,7 @@ describe 'Range', ->
         while node.data.length > 1
           node = node.splitText(1)
 
-        norm = r.normalize(fixture.el)
+        norm = range.normalize(fixture.el)
         assert.equal(norm.start.data, 'h')
 
       it "with the end property == last text node (inclusive) of the range", ->
@@ -80,12 +90,12 @@ describe 'Range', ->
         while node.data.length > 1
           node = node.splitText(1)
 
-        norm = r.normalize(fixture.el)
+        norm = range.normalize(fixture.el)
         assert.equal(norm.end.data, 'i')
 
       it "should raise NotFoundError if a node cannot be found", ->
         root = document.createElement('div')
-        check = -> r.normalize(root)
+        check = -> range.normalize(root)
         assert.throw(check, 'NotFoundError')
 
       it "should raise IndexSizeError if an offset is too large", ->
@@ -94,7 +104,7 @@ describe 'Range', ->
         assert.throw(check, 'IndexSizeError')
 
     it "serialize() returns a serialized range", ->
-      seri = r.serialize(fixture.el)
+      seri = range.serialize(fixture.el)
       assert.equal(seri.start, "/p[1]/strong[1]")
       assert.equal(seri.startOffset, 13)
       assert.equal(seri.end, "/p[1]/strong[1]")
@@ -102,7 +112,7 @@ describe 'Range', ->
       assert.isTrue(seri instanceof Range.SerializedRange)
 
     it "toObject() returns a simple object", ->
-      obj = r.toObject()
+      obj = range.toObject()
       assert.equal(obj.start, "/p/strong")
       assert.equal(obj.startOffset, 13)
       assert.equal(obj.end, "/p/strong")
@@ -111,19 +121,19 @@ describe 'Range', ->
 
   describe "BrowserRange", ->
     beforeEach ->
-      sel = mockSelection(0)
-      r = new Range.BrowserRange(sel.getRangeAt(0))
+      range = createRange(0)
+      range = new Range.BrowserRange(range)
 
     it "normalize() returns a normalized range", ->
-      norm = r.normalize()
+      norm = range.normalize()
       assert.instanceOf(norm, Range.NormalizedRange)
 
     testBrowserRange = (i) ->
       ->
-        sel   = mockSelection(i)
-        range = new Range.BrowserRange(sel.getRangeAt(0))
+        range = createRange(i)
+        range = new Range.BrowserRange(range)
         norm  = range.normalize(fixture.el)
-        assert.equal(norm.text(), sel.expectation)
+        assert.equal(norm.text(), testData[i][4], testData[i][5])
 
     for i in [0...testData.length]
       it "should parse test range #{i} (#{testData[i][5]})", testBrowserRange(i)
@@ -132,21 +142,21 @@ describe 'Range', ->
     sel = null
 
     beforeEach ->
-      sel = mockSelection(7)
-      browserRange = new Range.BrowserRange(sel.getRangeAt(0))
-      r = browserRange.normalize()
+      range = createRange(7)
+      range = new Range.BrowserRange(range)
+      range = range.normalize()
 
     it "textNodes() returns an array of textNodes", ->
-      textNodes = r.textNodes()
+      textNodes = range.textNodes()
 
       assert.isArray(textNodes)
-      assert.lengthOf(textNodes, sel.endOffset)
+      assert.lengthOf(textNodes, testData[7][3])
 
       # Should contain the contents of the first <strong> element.
       assert.equal(textNodes[0].nodeValue, 'Pellentesque habitant morbi tristique')
 
     it "text() returns the textual contents of the range", ->
-      assert.equal(r.text(), sel.expectation)
+      assert.equal(range.text(), testData[7][4])
 
     describe "limit", ->
       headText = null
