@@ -11,9 +11,6 @@ describe 'xpath', ->
   describe '#fromNode', ->
 
     it "generates an XPath string for an element's position in the document", ->
-      # FIXME: this is quite fragile. A change to dom.html may well break these tests and the
-      #        resulting xpaths will need to be changed.
-
       pathToFixHTML = '/html[1]/body[1]/div[1]'
 
       pEl = fixture.el.getElementsByTagName('p')[0]
@@ -28,7 +25,7 @@ describe 'xpath', ->
       strongPath = pathToFixHTML + '/p[2]/strong[1]'
       assert.equal(xpath.fromNode(strongEl), strongPath)
 
-    it "takes an optional parameter determining the element from which XPaths should be calculated", ->
+    it "takes an optional root parameter for a relative path root", ->
       ol = fixture.el.getElementsByTagName('ol')[0]
       li = fixture.el.getElementsByTagName('li')[0]
       assert.deepEqual(xpath.fromNode(li, ol), '/li[1]')
