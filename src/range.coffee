@@ -9,28 +9,6 @@ TEXT_NODE = 3
 
 Range = {}
 
-# Public: Determines the type of Range of the provided object and returns
-# a suitable Range instance.
-#
-# r - A range Object.
-#
-# Examples
-#
-#   selection = window.getSelection()
-#   Range.sniff(selection.getRangeAt(0))
-#   # => Returns a BrowserRange instance.
-#
-# Returns a Range object or false.
-Range.sniff = (r) ->
-  if r.commonAncestorContainer?
-    new Range.BrowserRange(r)
-  else if typeof r.start is "string"
-    new Range.SerializedRange(r)
-  else if r.start and typeof r.start is "object"
-    new Range.NormalizedRange(r)
-  else
-    false
-
 class Range.RangeError
   constructor: (@type, @message, @parent = null) ->
     @stack = (new Error()).stack
