@@ -52,6 +52,7 @@ toNode = (path, root = document, resolver) ->
   catch
     # Fallback approach in case of no document.evaluate() or another error.
     # This approach works for the simple expressions this module generates.
+    path = path.replace(/_default_:/g, '')
     steps = path.split("/")
     node = root
     while node?
@@ -59,7 +60,6 @@ toNode = (path, root = document, resolver) ->
       if step is undefined then break
       if step is '.' then continue
       [name, position] = step.split(/[\[\]]/)
-      name = name.replace(/^_default_:/g, '')
       position = if position? then parseInt(position) else 1
       node = findChild(node, name, position)
     return node
