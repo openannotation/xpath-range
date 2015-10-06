@@ -101,14 +101,9 @@ class Range.BrowserRange
     this.splitBoundaries()
 
     # Initialize the result.
-    commonAncestor = null
+    commonAncestor = @commonAncestorContainer
     start = null
     end = null
-
-    # Find a common ancestor Element.
-    commonAncestor = @commonAncestorContainer
-    while commonAncestor.nodeType isnt ELEMENT_NODE
-      commonAncestor = commonAncestor.parentNode
 
     # Get (a copy of) the boundaries of the range.
     {startContainer, startOffset, endContainer, endOffset} = this
@@ -219,11 +214,10 @@ class Range.NormalizedRange
 
     return null unless @start and @end
 
-    startParents = ancestors(@start)
-    for parent in ancestors(@end)
-      if startParents.indexOf(parent) != -1
-        @commonAncestor = parent
-        break
+    @commonAncestor = @start
+    while not contains(@commonAncestor, @end)
+      @commonAncestor = @commonAncestor.parentNode
+
     this
 
   # Convert this range into an object consisting of two pairs of (xpath,
