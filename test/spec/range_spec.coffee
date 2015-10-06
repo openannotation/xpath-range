@@ -1,4 +1,4 @@
-Range = require('../../src/range')
+{BrowserRange, NormalizedRange, SerializedRange} = require('../../src/range')
 xpath = require('../../src/xpath')
 
 createRange = (i) ->
@@ -45,32 +45,31 @@ testData = [
 ]
 
 describe 'Range', ->
-  range = null
-
-  beforeEach ->
-    fixture.load('range.html')
-
-  afterEach ->
-    fixture.cleanup()
 
   describe "SerializedRange", ->
+    range = null
+
     beforeEach ->
-      range = new Range.SerializedRange
+      fixture.load('range.html')
+      range = new SerializedRange
         start: "/p/strong"
         startOffset: 13
         end: "/p/strong"
         endOffset: 27
 
+    afterEach ->
+      fixture.cleanup()
+
     describe "normalize", ->
       it "should return a normalized range", ->
         norm = range.normalize(fixture.el)
-        assert.isTrue(norm instanceof Range.NormalizedRange)
+        assert.isTrue(norm instanceof NormalizedRange)
         assert.equal(norm.text(), "habitant morbi")
 
       it "should return a normalized range with 0 offsets", ->
         range.startOffset = 0
         norm = range.normalize(fixture.el)
-        assert.isTrue(norm instanceof Range.NormalizedRange)
+        assert.isTrue(norm instanceof NormalizedRange)
         assert.equal(norm.text(), "Pellentesque habitant morbi")
 
       it "with the start property == first text node in the range", ->
@@ -109,7 +108,7 @@ describe 'Range', ->
       assert.equal(seri.startOffset, 13)
       assert.equal(seri.end, "/p[1]/strong[1]")
       assert.equal(seri.endOffset, 27)
-      assert.isTrue(seri instanceof Range.SerializedRange)
+      assert.isTrue(seri instanceof SerializedRange)
 
     it "toObject() returns a simple object", ->
       obj = range.toObject()
@@ -120,18 +119,24 @@ describe 'Range', ->
       assert.equal(JSON.stringify(obj), '{"start":"/p/strong","startOffset":13,"end":"/p/strong","endOffset":27}')
 
   describe "BrowserRange", ->
+    range = null
+
     beforeEach ->
+      fixture.load('range.html')
       range = createRange(0)
-      range = new Range.BrowserRange(range)
+      range = new BrowserRange(range)
+
+    afterEach ->
+      fixture.cleanup()
 
     it "normalize() returns a normalized range", ->
       norm = range.normalize()
-      assert.instanceOf(norm, Range.NormalizedRange)
+      assert.instanceOf(norm, NormalizedRange)
 
     testBrowserRange = (i) ->
       ->
         range = createRange(i)
-        range = new Range.BrowserRange(range)
+        range = new BrowserRange(range)
         norm  = range.normalize(fixture.el)
         assert.equal(norm.text(), testData[i][4], testData[i][5])
 
@@ -139,12 +144,16 @@ describe 'Range', ->
       it "should parse test range #{i} (#{testData[i][5]})", testBrowserRange(i)
 
   describe "NormalizedRange", ->
-    sel = null
+    range = null
 
     beforeEach ->
+      fixture.load('range.html')
       range = createRange(7)
-      range = new Range.BrowserRange(range)
+      range = new BrowserRange(range)
       range = range.normalize()
+
+    afterEach ->
+      fixture.cleanup()
 
     it "textNodes() returns an array of textNodes", ->
       textNodes = range.textNodes()
@@ -191,7 +200,7 @@ describe 'Range', ->
         root.appendChild(para2)
 
       it "should be a no-op if all nodes are within the bounding element.", ->
-        range = new Range.NormalizedRange({
+        range = new NormalizedRange({
           commonAncestor: para
           start: paraText
           end: paraText2
@@ -203,7 +212,7 @@ describe 'Range', ->
         assert.equal(range.end, paraText2)
 
       it "should exclude any nodes to the left of the bounding element.", ->
-        range = new Range.NormalizedRange({
+        range = new NormalizedRange({
           commonAncestor: root
           start: headText
           end: paraText2
@@ -215,7 +224,7 @@ describe 'Range', ->
         assert.equal(range.end, paraText2)
 
       it "should exclude any nodes to the right of the bounding element.", ->
-        range = new Range.NormalizedRange({
+        range = new NormalizedRange({
           commonAncestor: root
           start: paraText
           end: para2Text
@@ -227,7 +236,7 @@ describe 'Range', ->
         assert.equal(range.end, paraText3)
 
       it "should exclude any nodes on either side of the bounding element.", ->
-        range = new Range.NormalizedRange({
+        range = new NormalizedRange({
           commonAncestor: root
           start: headText
           end: para2Text
@@ -240,7 +249,7 @@ describe 'Range', ->
 
       it "should return null if no nodes fall within the bounds", ->
         otherDiv = document.createElement('div')
-        range = new Range.NormalizedRange({
+        range = new NormalizedRange({
           commonAncestor: root
           start: headText
           end: paraText2
@@ -256,7 +265,7 @@ describe 'Range', ->
         fixture.cleanup()
 
       it "returns an element's textNode descendants", ->
-        range = new Range.BrowserRange({
+        range = new BrowserRange({
           commonAncestorContainer: fixture.el
           startContainer: fixture.el
           startOffset: 0
@@ -264,8 +273,8 @@ describe 'Range', ->
           endOffset: fixture.el.childNodes.length
         })
 
-        normedRange = range.normalize(fixture.el)
-        nodes = normedRange.textNodes()
+        range = range.normalize(fixture.el)
+        nodes = range.textNodes()
         text = (node.nodeValue for node in nodes)
 
         expectation = [ '\n  '
@@ -306,13 +315,13 @@ describe 'Range', ->
         # assert.lengthOf(para.childNodes, 2)
         # assert.lengthOf($(para).contents(), 2)
 
-        range = new Range.BrowserRange({
+        range = new BrowserRange({
           commonAncestorContainer: para,
           startContainer: para,
           startOffset: 0,
           endContainer: para,
           endOffset: para.childNodes.length
         })
-        normedRange = range.normalize(para)
-        textNodes = normedRange.textNodes()
+        range = range.normalize(para)
+        textNodes = range.textNodes()
         assert.lengthOf(textNodes, 2)

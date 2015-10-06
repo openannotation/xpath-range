@@ -9,11 +9,9 @@ xpath = require('./xpath')
 ELEMENT_NODE = 1
 TEXT_NODE = 3
 
-Range = {}
-
 
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
-class Range.BrowserRange
+exports.BrowserRange = class BrowserRange
 
   # Public: Creates an instance of BrowserRange.
   #
@@ -22,7 +20,7 @@ class Range.BrowserRange
   # Examples
   #
   #   selection = window.getSelection()
-  #   range = new Range.BrowserRange(selection.getRangeAt(0))
+  #   range = new BrowserRange(selection.getRangeAt(0))
   #
   # Returns an instance of BrowserRange.
   constructor: (obj) ->
@@ -68,7 +66,7 @@ class Range.BrowserRange
 
   # Public: Normalize the start and end to TextNode boundaries.
   #
-  # Returns an instance of Range.NormalizedRange
+  # Returns an instance of NormalizedRange
   normalize: (root) ->
     this.splitBoundaries()
 
@@ -112,7 +110,7 @@ class Range.BrowserRange
 
       node = previousBranch(commonAncestor, node)
 
-    return new Range.NormalizedRange({commonAncestor, start, end})
+    return new NormalizedRange({commonAncestor, start, end})
 
   # Public: Creates a range suitable for storage.
   #
@@ -127,7 +125,7 @@ class Range.BrowserRange
 # Public: A normalised range is most commonly used throughout the annotator.
 # its the result of a deserialised SerializedRange or a BrowserRange with
 # out browser inconsistencies.
-class Range.NormalizedRange
+exports.NormalizedRange = class NormalizedRange
 
   # Public: Creates an instance of a NormalizedRange.
   #
@@ -225,7 +223,7 @@ class Range.NormalizedRange
     start = serialization(@start)
     end   = serialization(@end, true)
 
-    new Range.SerializedRange({
+    new SerializedRange({
       # XPath strings
       start: start[0]
       end: end[0]
@@ -253,7 +251,7 @@ class Range.NormalizedRange
     return textNodes[start..end]
 
 # Public: A range suitable for storing in local storage or serializing to JSON.
-class Range.SerializedRange
+exports.SerializedRange = class SerializedRange
 
   # Public: Creates a SerializedRange
   #
@@ -325,7 +323,7 @@ class Range.SerializedRange
         range.commonAncestorContainer = node
         break
 
-    new Range.BrowserRange(range).normalize(root)
+    new BrowserRange(range).normalize(root)
 
   # Public: Creates a range suitable for storage.
   #
@@ -381,7 +379,3 @@ getTextNodes = (root) ->
       text.push(node)
     node = nextBranch(root, node)
   return text
-
-
-# Export Range object.
-module.exports = Range
