@@ -111,57 +111,35 @@ class Range.BrowserRange
 
     # Move the start container to the last leaf before any sibling boundary.
     # All children of the start container will fall within the range.
-    # This step obviates the recursion when iterating over the text.
     while startContainer.childNodes.length and startOffset > 0
       startContainer = startContainer.childNodes[startOffset-1]
       startOffset = startContainer.length or startContainer.childNodes.length
 
-    # Find the first TextNode.
+    # Find the first TextNode not excluded by the start offset.
     node = startContainer
-    while node?
-      # Skip to the first leaf Node, since all children are included.
-      # This step substitutes for recursion, capitalizing on the preconditions.
-      while node.firstChild?
-        node = node.firstChild
-
-      # Terminate on the first TextNode not excluded by the offset.
+    while node? and node = firstLeaf(node)
       if node.nodeType is Util.NodeTypes.TEXT_NODE
         if not (node is startContainer and startOffset isnt 0)
           start = node
           break
 
-      # Skip to the next branch, staying within the common ancestor.
-      while not (node.nextSibling? or node is commonAncestor)
-        node = node.parentNode
-
-      node = node.nextSibling
+      node = nextBranch(commonAncestor, node)
 
     # Move the end container to the first leaf before any sibling boundary.
     # All children of the end container will fall within the range.
-    # This step obviates the recursion when iterating over the text in reverse.
     while endOffset < endContainer.childNodes.length
       endContainer = endContainer.childNodes[endOffset]
       endOffset = 0
 
-    # Find the last TextNode.
+    # Find the last TextNode not excluded by the end offset.
     node = endContainer
-    while node?
-      # Skip to the last leaf Node, since all children are included.
-      # This step substitutes for recursion, capitalizing on the preconditions.
-      while node.lastChild?
-        node = node.lastChild
-
-      # Terminate on the first TextNode not excluded by the offset.
+    while node? and node = lastLeaf(node)
       if node.nodeType is Util.NodeTypes.TEXT_NODE
         if not (node is endContainer and endOffset is 0)
           end = node
           break
 
-      # Skip to the previous branch, staying within the common ancestor.
-      while not (node.previousSibling? or node is commonAncestor)
-        node = node.parentNode
-
-      node = node.previousSibling
+      node = previousBranch(commonAncestor, node)
 
     return new Range.NormalizedRange({commonAncestor, start, end})
 
@@ -395,6 +373,32 @@ class Range.SerializedRange
       end: @end
       endOffset: @endOffset
     }
+
+
+firstLeaf = (node) ->
+  while node.hasChildNodes()
+    node = node.firstChild
+  return node
+
+
+lastLeaf = (node) ->
+  while node.hasChildNodes()
+    node = node.lastChild
+  return node
+
+
+nextBranch = (root, node) ->
+  while node? and node isnt root
+    if node.nextSibling? then return node.nextSibling
+    node = node.parentNode
+  return null
+
+
+previousBranch = (root, node) ->
+  while node? and node isnt root
+    if node.previousSibling? then return node.previousSibling
+    node = node.parentNode
+  return null
 
 
 # Export Range object.
