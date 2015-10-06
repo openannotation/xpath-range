@@ -10,6 +10,21 @@ ELEMENT_NODE = 1
 TEXT_NODE = 3
 
 
+insertAfter = (node, referenceNode) ->
+  parent = referenceNode.parentNode
+  next = referenceNode.nextSibling
+  if next then return parent.insertBefore(node, next)
+  return parent.appendChild(node)
+
+
+# https://github.com/Raynos/DOM-shim/issues/11
+splitText = (node, offset) ->
+  tail = node.cloneNode(false)
+  tail.deleteData(0, offset)
+  node.deleteData(offset, node.length - offset)
+  return insertAfter(tail, node)
+
+
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
 exports.BrowserRange = class BrowserRange
 
@@ -35,7 +50,7 @@ exports.BrowserRange = class BrowserRange
       if 0 < @endOffset < @endContainer.length
         if @startContainer is @endContainer
           @commonAncestorContainer = @endContainer.parentNode
-          @endContainer = @endContainer.splitText(@endOffset)
+          @endContainer = splitText(@endContainer, @endOffset)
 
           if @endOffset <= @startOffset
             @startContainer = @endContainer
@@ -43,7 +58,7 @@ exports.BrowserRange = class BrowserRange
 
           @endOffset = 0
         else
-          @endContainer = @endContainer.splitText(@endOffset)
+          @endContainer = splitText(@endContainer, @endOffset)
           @endOffset = 0
 
     if @startContainer.nodeType is TEXT_NODE
@@ -53,7 +68,7 @@ exports.BrowserRange = class BrowserRange
 
         if @startContainer is @endContainer
           @commonAncestorContainer = @startContainer.parentNode
-          @startContainer = @startContainer.splitText(@startOffset)
+          @startContainer = splitText(@startContainer, @startOffset)
 
           if @startOffset <= @endOffset
             @endContainer = @startContainer
@@ -61,7 +76,7 @@ exports.BrowserRange = class BrowserRange
 
           @startOffset = 0
         else
-          @startContainer = @startContainer.splitText(@startOffset)
+          @startContainer = splitText(@startContainer, @startOffset)
           @startOffset = 0
 
   # Public: Normalize the start and end to TextNode boundaries.
