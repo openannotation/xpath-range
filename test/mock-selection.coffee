@@ -43,10 +43,7 @@ module.exports = class MockSelection
     @rangeCount += 1
 
   resolvePath: (path) ->
-    if typeof path is "number"
-      Util.getTextNodes(@root)[path]
-    else if typeof path is "string"
-      this.resolveXPath(@rootXPath + path)
+    this.resolveXPath(@rootXPath + path)
 
   resolveXPath: (xpath) ->
     document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
