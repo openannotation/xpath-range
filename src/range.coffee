@@ -11,7 +11,7 @@ ELEMENT_NODE = 1
 TEXT_NODE = 3
 
 
-exports.splitBoundaries = splitBoundaries = (range) ->
+splitBoundaries = (range) ->
   {startContainer, startOffset, endContainer, endOffset} = range
 
   if isTextNode(endContainer)
@@ -30,7 +30,7 @@ exports.splitBoundaries = splitBoundaries = (range) ->
 
 
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
-exports.BrowserRange = class BrowserRange
+class BrowserRange
 
   # Public: Creates an instance of BrowserRange.
   #
@@ -124,7 +124,7 @@ exports.BrowserRange = class BrowserRange
 # Public: A normalised range is most commonly used throughout the annotator.
 # its the result of a deserialised SerializedRange or a BrowserRange with
 # out browser inconsistencies.
-exports.NormalizedRange = class NormalizedRange
+class NormalizedRange
 
   # Public: Creates an instance of a NormalizedRange.
   #
@@ -252,7 +252,7 @@ exports.NormalizedRange = class NormalizedRange
     return textNodes[start..end]
 
 # Public: A range suitable for storing in local storage or serializing to JSON.
-exports.SerializedRange = class SerializedRange
+class SerializedRange
 
   # Public: Creates a SerializedRange
   #
@@ -419,3 +419,12 @@ commonAncestor = (node, other) ->
   while node? and not contains(node, other)
     node = node.parentNode
   return node
+
+
+# Export the public module interface.
+module.exports = {
+  BrowserRange
+  NormalizedRange
+  SerializedRange
+  splitBoundaries
+}
