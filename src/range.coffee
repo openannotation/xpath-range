@@ -46,7 +46,7 @@ exports.BrowserRange = class BrowserRange
     @endOffset               = obj.endOffset
 
   splitBoundaries: ->
-    if @endContainer.nodeType is TEXT_NODE
+    if isTextNode(@endContainer)
       if 0 < @endOffset < @endContainer.length
         if @startContainer is @endContainer
           @commonAncestorContainer = @endContainer.parentNode
@@ -61,7 +61,7 @@ exports.BrowserRange = class BrowserRange
           @endContainer = splitText(@endContainer, @endOffset)
           @endOffset = 0
 
-    if @startContainer.nodeType is TEXT_NODE
+    if isTextNode(@startContainer)
       if 0 < @startOffset < @startContainer.length
         if @commonAncestorContainer is @startContainer
           @commonAncestorContainer = @commonAncestorContainer.parentNode
@@ -93,37 +93,38 @@ exports.BrowserRange = class BrowserRange
     # Get (a copy of) the boundaries of the range.
     {startContainer, startOffset, endContainer, endOffset} = this
 
-    # Move the start container to the last leaf before any sibling boundary.
-    # All children of the start container will fall within the range.
-    while startContainer.childNodes.length and startOffset > 0
-      startContainer = startContainer.childNodes[startOffset-1]
+    # Move the start container to the last leaf before any sibling boundary,
+    # guaranteeing that any children of the container are within the range.
+    if startContainer.childNodes.length and startOffset > 0
+      startContainer = lastLeaf(startContainer.childNodes[startOffset-1])
       startOffset = startContainer.length or startContainer.childNodes.length
 
-    # Find the first TextNode not excluded by the start offset.
-    node = startContainer
-    while node? and node = firstLeaf(node)
-      if node.nodeType is TEXT_NODE
-        if not (node is startContainer and startOffset isnt 0)
-          start = node
-          break
-
-      node = nextBranch(commonAncestor, node)
-
-    # Move the end container to the first leaf before any sibling boundary.
-    # All children of the end container will fall within the range.
-    while endOffset < endContainer.childNodes.length
-      endContainer = endContainer.childNodes[endOffset]
+    # Move the end container to the first leaf after any sibling boundary,
+    # guaranteeing that any children of the container are within the range.
+    if endOffset < endContainer.childNodes.length
+      endContainer = firstLeaf(endContainer.childNodes[endOffset])
       endOffset = 0
 
-    # Find the last TextNode not excluded by the end offset.
-    node = endContainer
-    while node? and node = lastLeaf(node)
-      if node.nodeType is TEXT_NODE
-        if not (node is endContainer and endOffset is 0)
-          end = node
-          break
+    # These above implies that a post-order traversal visits every Node in the
+    # Range before visiting the end container. The first Node in the order is
+    # the first leaf of the start container.
+    from = firstLeaf(startContainer)
 
-      node = previousBranch(commonAncestor, node)
+    # Similarly, a post-order traversal that reverses the child order visits
+    # every Node in the Range before visiting the end container. The first
+    # Node in the order is the last leaf of the start container.
+    to = lastLeaf(endContainer)
+
+    # Any TextNode in the traversal is valid unless excluded by the offset.
+    checkNode = (node) ->
+      if not isTextNode(node) then return false
+      if node is startContainer and startOffset > 0 then return false
+      if node is endContainer and endOffset == 0 then return false
+      return true
+
+    # Find the start and end TextNode nodes.
+    start = findNode(from, to, checkNode, postFirst)
+    end = findNode(to, from, checkNode, postLast)
 
     return new NormalizedRange({commonAncestor, start, end})
 
@@ -182,20 +183,10 @@ exports.NormalizedRange = class NormalizedRange
     document = bounds.ownerDocument
 
     if not contains(bounds, @start)
-      node = bounds
-      while node? and node = firstLeaf(node)
-        if node.nodeType is TEXT_NODE
-          break
-        node = node.nextBranch(bounds, node)
-      @start = node
+      @start = findNode(firstLeaf(bounds), bounds, isTextNode, postFirst)
 
     if not contains(bounds, @end)
-      node = bounds
-      while node? and node = lastLeaf(node)
-        if node.nodeType is TEXT_NODE
-          break
-        node = node.previousBranch(bounds, node)
-      @end = node
+      @end = findNode(lastLeaf(bounds), bounds, isTextNode, postLast)
 
     return null unless @start and @end
 
@@ -329,7 +320,7 @@ exports.SerializedRange = class SerializedRange
         throw new DOMException(message, name)
 
     for node in ancestors(range.startContainer)
-      if range.endContainer.nodeType == TEXT_NODE
+      if isTextNode(range.endContainer)
         endContainer = range.endContainer.parentNode
       else
         endContainer = range.endContainer
@@ -360,37 +351,50 @@ exports.SerializedRange = class SerializedRange
     }
 
 
-firstLeaf = (node) ->
-  while node.hasChildNodes()
-    node = node.firstChild
-  return node
-
-
-lastLeaf = (node) ->
-  while node.hasChildNodes()
-    node = node.lastChild
-  return node
-
-
-nextBranch = (root, node) ->
-  while node? and node isnt root
-    if node.nextSibling? then return node.nextSibling
-    node = node.parentNode
-  return null
-
-
-previousBranch = (root, node) ->
-  while node? and node isnt root
-    if node.previousSibling? then return node.previousSibling
-    node = node.parentNode
-  return null
-
-
+# Get all the text Nodes within a Node.
 getTextNodes = (root) ->
   text = []
-  node = root
-  while node? and node = firstLeaf(node)
-    if node.nodeType is TEXT_NODE
-      text.push(node)
-    node = nextBranch(root, node)
+  node = firstLeaf(root)
+  while node = findNode(node, root, isTextNode, postFirst)
+    text.push(node)
+    if node is root then break
+    node = postFirst(node)
   return text
+
+
+# Predicate for checking if a node is a TextNode.
+isTextNode = (node) ->
+  return node.nodeType is TEXT_NODE
+
+
+# Find the first Node in [start, end] (by step(node)) that passes the check.
+findNode = (start, end, check, step) ->
+  node = start
+  node = step(node) while not (pass = check(node)) and node isnt end
+  if pass then return node else return null
+
+
+# Return the next Node in a first-to-last-child post-order traversal.
+postFirst = (node) ->
+  if node.nextSibling?
+    return firstLeaf(node.nextSibling)
+  return node.parentNode
+
+
+# Return the next Node in a last-to-first-child post-order traversal.
+postLast = (node) ->
+  if node.previousSibling?
+    return lastLeaf(node.previousSibling)
+  return node.parentNode
+
+
+# Find the first leaf node.
+firstLeaf = (node) ->
+  node = node.firstChild while node.hasChildNodes()
+  return node
+
+
+# Find the last leaf node.
+lastLeaf = (node) ->
+  node = node.lastChild while node.hasChildNodes()
+  return node
