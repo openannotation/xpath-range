@@ -11,6 +11,24 @@ ELEMENT_NODE = 1
 TEXT_NODE = 3
 
 
+exports.splitBoundaries = splitBoundaries = (range) ->
+  {startContainer, startOffset, endContainer, endOffset} = range
+
+  if isTextNode(endContainer)
+    if 0 < endOffset < endContainer.length
+      endContainer = splitText(endContainer, endOffset)
+      range.setEnd(endContainer, 0)
+
+  if isTextNode(startContainer)
+    if 0 < startOffset < startContainer.length
+      if startContainer is endContainer
+        startContainer = splitText(startContainer, startOffset)
+        range.setEnd(startContainer, endOffset - startOffset)
+      else
+        startContainer = splitText(startContainer, startOffset)
+      range.setStart(startContainer, 0)
+
+
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
 exports.BrowserRange = class BrowserRange
 
@@ -31,45 +49,18 @@ exports.BrowserRange = class BrowserRange
     @endContainer            = obj.endContainer
     @endOffset               = obj.endOffset
 
-  splitBoundaries: ->
-    if isTextNode(@endContainer)
-      if 0 < @endOffset < @endContainer.length
-        if @startContainer is @endContainer
-          @commonAncestorContainer = @endContainer.parentNode
-          @endContainer = splitText(@endContainer, @endOffset)
 
-          if @endOffset <= @startOffset
-            @startContainer = @endContainer
-            @startOffset -= @endOffset
+  setStart: (@startContainer, @startOffset) ->
+    @commonAncestorContainer = commonAncestor(@startContainer, @endContainer)
 
-          @endOffset = 0
-        else
-          @endContainer = splitText(@endContainer, @endOffset)
-          @endOffset = 0
-
-    if isTextNode(@startContainer)
-      if 0 < @startOffset < @startContainer.length
-        if @commonAncestorContainer is @startContainer
-          @commonAncestorContainer = @commonAncestorContainer.parentNode
-
-        if @startContainer is @endContainer
-          @commonAncestorContainer = @startContainer.parentNode
-          @startContainer = splitText(@startContainer, @startOffset)
-
-          if @startOffset <= @endOffset
-            @endContainer = @startContainer
-            @endOffset -= @startOffset
-
-          @startOffset = 0
-        else
-          @startContainer = splitText(@startContainer, @startOffset)
-          @startOffset = 0
+  setEnd: (@endContainer, @endOffset) ->
+    @commonAncestorContainer = commonAncestor(@startContainer, @endContainer)
 
   # Public: Normalize the start and end to TextNode boundaries.
   #
   # Returns an instance of NormalizedRange
   normalize: (root) ->
-    this.splitBoundaries()
+    splitBoundaries(this)
 
     # Initialize the result.
     commonAncestor = @commonAncestorContainer
