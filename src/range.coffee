@@ -192,7 +192,7 @@ exports.NormalizedRange = class NormalizedRange
         origParent = node.parentNode
 
       path = xpath.fromNode(origParent, root)
-      textNodes = getTextNodes(origParent)
+      textNodes = getNodes(origParent, isTextNode)
 
       # Calculate real offset as the combined length of all the
       # preceding textNode siblings. We include the length of the
@@ -229,7 +229,7 @@ exports.NormalizedRange = class NormalizedRange
   #
   # Returns an Array of TextNode instances.
   textNodes: ->
-    textNodes = getTextNodes(this.commonAncestor)
+    textNodes = getNodes(this.commonAncestor, isTextNode)
     [start, end] = [textNodes.indexOf(this.start), textNodes.indexOf(this.end)]
     # Return the textNodes that fall between the start and end indexes.
     return textNodes[start..end]
@@ -281,7 +281,7 @@ exports.SerializedRange = class SerializedRange
       # Target the string index of the last character inside the range.
       if p is 'end' then targetOffset -= 1
 
-      for tn in getTextNodes(node)
+      for tn in getNodes(node, isTextNode)
         if (length + tn.nodeValue.length > targetOffset)
           range[p + 'Container'] = tn
           range[p + 'Offset'] = this[p + 'Offset'] - length
@@ -322,6 +322,28 @@ exports.SerializedRange = class SerializedRange
     }
 
 
+some = (node, fn, traverse = preFirst) ->
+  result = []
+  while fn(node)
+    result.push(node)
+    node = traverse(node)
+  return result
+
+
+# Get all the matching Nodes contained by a root Node.
+getNodes = (root, fn = (-> true)) ->
+  result = []
+  last = lastLeaf(root)
+
+  collect = (node) ->
+    if fn(node) then result.push(node)
+    return node isnt last
+
+  some(root, collect)
+
+  return result
+
+
 # Split a TextNode at an offset, returning the successor.
 # https://github.com/Raynos/DOM-shim/issues/11
 splitText = (node, offset) ->
@@ -329,18 +351,6 @@ splitText = (node, offset) ->
   tail.deleteData(0, offset)
   node.deleteData(offset, node.length - offset)
   return insertAfter(tail, node)
-
-
-# Get all the text Nodes within a Node.
-getTextNodes = (root) ->
-  text = []
-  node = root
-  end = lastLeaf(root)
-  while node = findNode(node, end, isTextNode, preFirst)
-    text.push(node)
-    if node is end then break
-    node = preFirst(node)
-  return text
 
 
 # Predicate for checking if a node is a TextNode.
