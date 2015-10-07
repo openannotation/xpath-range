@@ -97,9 +97,17 @@ exports.BrowserRange = class BrowserRange
       if node is endContainer and endOffset == 0 then return false
       return true
 
-    # Find the start and end TextNode nodes.
-    start = findNode(startContainer, last, checkNode, preFirst)
-    end = findNode(endContainer, first, checkNode, preLast)
+    # Find the start and end TextNode.
+    checkStart = (node) ->
+      if checkNode(node) then start = node
+      return not (start or node is last)
+
+    checkEnd = (node) ->
+      if checkNode(node) then end = node
+      return not (end or node is start)
+
+    someNode(startContainer, checkStart)
+    someNode(endContainer, checkEnd, preLast)
 
     return new NormalizedRange({commonAncestor, start, end})
 
@@ -157,14 +165,23 @@ exports.NormalizedRange = class NormalizedRange
 
     document = bounds.ownerDocument
 
-    first = firstLeaf(bounds)
-    last = lastLeaf(bounds)
-
     if not contains(bounds, @start)
-      @start = findNode(bounds, last, isTextNode, preFirst)
+      start = null
+      last = lastLeaf(bounds)
+      checkStart = (node) ->
+        if isTextNode(node) then start = node
+        return not (start or node is last)
+      someNode(bounds, checkStart)
+      @start = start
 
     if not contains(bounds, @end)
-      @end = findNode(bounds, first, isTextNode, preLast)
+      end = null
+      first = firstLeaf(bounds)
+      checkEnd = (node) ->
+        if isTextNode(node) then end = node
+        return not (end or node is first)
+      someNode(bounds, checkEnd, preLast)
+      @end = end
 
     return null unless @start and @end
 
@@ -192,7 +209,7 @@ exports.NormalizedRange = class NormalizedRange
         origParent = node.parentNode
 
       path = xpath.fromNode(origParent, root)
-      textNodes = getNodes(origParent, isTextNode)
+      textNodes = filterNode(origParent, isTextNode)
 
       # Calculate real offset as the combined length of all the
       # preceding textNode siblings. We include the length of the
@@ -229,7 +246,7 @@ exports.NormalizedRange = class NormalizedRange
   #
   # Returns an Array of TextNode instances.
   textNodes: ->
-    textNodes = getNodes(this.commonAncestor, isTextNode)
+    textNodes = filterNode(this.commonAncestor, isTextNode)
     [start, end] = [textNodes.indexOf(this.start), textNodes.indexOf(this.end)]
     # Return the textNodes that fall between the start and end indexes.
     return textNodes[start..end]
@@ -281,7 +298,7 @@ exports.SerializedRange = class SerializedRange
       # Target the string index of the last character inside the range.
       if p is 'end' then targetOffset -= 1
 
-      for tn in getNodes(node, isTextNode)
+      for tn in filterNode(node, isTextNode)
         if (length + tn.nodeValue.length > targetOffset)
           range[p + 'Container'] = tn
           range[p + 'Offset'] = this[p + 'Offset'] - length
@@ -322,16 +339,19 @@ exports.SerializedRange = class SerializedRange
     }
 
 
-some = (node, fn, traverse = preFirst) ->
-  result = []
-  while fn(node)
-    result.push(node)
-    node = traverse(node)
+# Return true if the given predicate is true for any Node of the tree.
+# The predicate function is invoked once for each Node in the tree.
+# An optional third argument specifies a traversal order and should be a
+# function that takes a Node and returns its successor. The default order is
+# DOM position order (pre-order).
+someNode = (node, fn, successor = preFirst) ->
+  result = false
+  node = successor(node) while result = fn(node)
   return result
 
 
-# Get all the matching Nodes contained by a root Node.
-getNodes = (root, fn = (-> true)) ->
+# Return an Array of each Node in the tree for which the predicate is true.
+filterNode = (root, fn = (-> true)) ->
   result = []
   last = lastLeaf(root)
 
@@ -339,7 +359,7 @@ getNodes = (root, fn = (-> true)) ->
     if fn(node) then result.push(node)
     return node isnt last
 
-  some(root, collect)
+  someNode(root, collect)
 
   return result
 
@@ -356,13 +376,6 @@ splitText = (node, offset) ->
 # Predicate for checking if a node is a TextNode.
 isTextNode = (node) ->
   return node.nodeType is TEXT_NODE
-
-
-# Find the first Node in [start, end] (by step(node)) that passes the check.
-findNode = (start, end, check, step) ->
-  node = start
-  node = step(node) while not (pass = check(node)) and node isnt end
-  if pass then return node else return null
 
 
 # Return the next Node in a first-to-last-child pre-order traversal.
