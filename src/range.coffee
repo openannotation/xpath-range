@@ -305,15 +305,8 @@ exports.SerializedRange = class SerializedRange
         name = "IndexSizeError"
         throw new DOMException(message, name)
 
-    for node in ancestors(range.startContainer)
-      if isTextNode(range.endContainer)
-        endContainer = range.endContainer.parentNode
-      else
-        endContainer = range.endContainer
-
-      if contains(node, endContainer)
-        range.commonAncestorContainer = node
-        break
+    range.commonAncestorContainer = commonAncestor(
+      range.startContainer, range.endContainer)
 
     new BrowserRange(range).normalize(root)
 
@@ -392,4 +385,11 @@ firstLeaf = (node) ->
 # Find the last leaf node.
 lastLeaf = (node) ->
   node = node.lastChild while node.hasChildNodes()
+  return node
+
+
+# Find a common ancestor Node.
+commonAncestor = (node, other) ->
+  while node? and not contains(node, other)
+    node = node.parentNode
   return node
