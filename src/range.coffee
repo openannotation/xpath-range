@@ -1,5 +1,6 @@
 ancestors = require('ancestors')
 contains = require('node-contains')
+insertAfter = require('insert-after')
 matches = require('matches-selector')
 
 DOMException = require('./dom-exception')
@@ -334,14 +335,6 @@ exports.SerializedRange = class SerializedRange
       end: @end
       endOffset: @endOffset
     }
-
-
-# Insert a Node as the successor sibling of a reference Node.
-insertAfter = (node, referenceNode) ->
-  parent = referenceNode.parentNode
-  next = referenceNode.nextSibling
-  if next then return parent.insertBefore(node, next)
-  return parent.appendChild(node)
 
 
 # Split a TextNode at an offset, returning the successor.
