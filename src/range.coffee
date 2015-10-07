@@ -82,15 +82,13 @@ exports.BrowserRange = class BrowserRange
       endContainer = firstLeaf(endContainer.childNodes[endOffset])
       endOffset = 0
 
-    # These above implies that a post-order traversal visits every Node in the
-    # Range before visiting the end container. The first Node in the order is
-    # the first leaf of the start container.
-    from = firstLeaf(startContainer)
+    # The above implies that a pre-order traversal visits every Node in the
+    # Range before visiting the last leaf of the end container.
+    first = firstLeaf(startContainer)
 
-    # Similarly, a post-order traversal that reverses the child order visits
-    # every Node in the Range before visiting the end container. The first
-    # Node in the order is the last leaf of the start container.
-    to = lastLeaf(endContainer)
+    # Similarly, a pre-order traversal that reverses the children visits every
+    # Node in the Range before visiting the first leaf of the start container.
+    last = lastLeaf(endContainer)
 
     # Any TextNode in the traversal is valid unless excluded by the offset.
     checkNode = (node) ->
@@ -100,8 +98,8 @@ exports.BrowserRange = class BrowserRange
       return true
 
     # Find the start and end TextNode nodes.
-    start = findNode(from, to, checkNode, postFirst)
-    end = findNode(to, from, checkNode, postLast)
+    start = findNode(startContainer, last, checkNode, preFirst)
+    end = findNode(endContainer, first, checkNode, preLast)
 
     return new NormalizedRange({commonAncestor, start, end})
 
@@ -159,11 +157,14 @@ exports.NormalizedRange = class NormalizedRange
 
     document = bounds.ownerDocument
 
+    first = firstLeaf(bounds)
+    last = lastLeaf(bounds)
+
     if not contains(bounds, @start)
-      @start = findNode(firstLeaf(bounds), bounds, isTextNode, postFirst)
+      @start = findNode(bounds, last, isTextNode, preFirst)
 
     if not contains(bounds, @end)
-      @end = findNode(lastLeaf(bounds), bounds, isTextNode, postLast)
+      @end = findNode(bounds, first, isTextNode, preLast)
 
     return null unless @start and @end
 
@@ -333,11 +334,12 @@ splitText = (node, offset) ->
 # Get all the text Nodes within a Node.
 getTextNodes = (root) ->
   text = []
-  node = firstLeaf(root)
-  while node = findNode(node, root, isTextNode, postFirst)
+  node = root
+  end = lastLeaf(root)
+  while node = findNode(node, end, isTextNode, preFirst)
     text.push(node)
-    if node is root then break
-    node = postFirst(node)
+    if node is end then break
+    node = preFirst(node)
   return text
 
 
@@ -353,18 +355,28 @@ findNode = (start, end, check, step) ->
   if pass then return node else return null
 
 
-# Return the next Node in a first-to-last-child post-order traversal.
-postFirst = (node) ->
-  if node.nextSibling?
-    return firstLeaf(node.nextSibling)
-  return node.parentNode
+# Return the next Node in a first-to-last-child pre-order traversal.
+preFirst = (node) ->
+  if node.firstChild?
+    return node.firstChild
+
+  while not node.nextSibling?
+    node = node.parentNode
+    if node is null then return null
+
+  return node.nextSibling
 
 
-# Return the next Node in a last-to-first-child post-order traversal.
-postLast = (node) ->
-  if node.previousSibling?
-    return lastLeaf(node.previousSibling)
-  return node.parentNode
+# Return the next Node in a last-to-first-child pre-order traversal.
+preLast = (node) ->
+  if node.lastChild?
+    return node.lastChild
+
+  while not node.previousSibling?
+    node = node.parentNode
+    if node is null then return null
+
+  return node.previousSibling
 
 
 # Find the first leaf node.
