@@ -10,21 +10,6 @@ ELEMENT_NODE = 1
 TEXT_NODE = 3
 
 
-insertAfter = (node, referenceNode) ->
-  parent = referenceNode.parentNode
-  next = referenceNode.nextSibling
-  if next then return parent.insertBefore(node, next)
-  return parent.appendChild(node)
-
-
-# https://github.com/Raynos/DOM-shim/issues/11
-splitText = (node, offset) ->
-  tail = node.cloneNode(false)
-  tail.deleteData(0, offset)
-  node.deleteData(offset, node.length - offset)
-  return insertAfter(tail, node)
-
-
 # Public: Creates a wrapper around a range object obtained from a DOMSelection.
 exports.BrowserRange = class BrowserRange
 
@@ -349,6 +334,23 @@ exports.SerializedRange = class SerializedRange
       end: @end
       endOffset: @endOffset
     }
+
+
+# Insert a Node as the successor sibling of a reference Node.
+insertAfter = (node, referenceNode) ->
+  parent = referenceNode.parentNode
+  next = referenceNode.nextSibling
+  if next then return parent.insertBefore(node, next)
+  return parent.appendChild(node)
+
+
+# Split a TextNode at an offset, returning the successor.
+# https://github.com/Raynos/DOM-shim/issues/11
+splitText = (node, offset) ->
+  tail = node.cloneNode(false)
+  tail.deleteData(0, offset)
+  node.deleteData(offset, node.length - offset)
+  return insertAfter(tail, node)
 
 
 # Get all the text Nodes within a Node.
