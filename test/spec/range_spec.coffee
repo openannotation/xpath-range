@@ -106,15 +106,7 @@ describe "SerializedRange", ->
     assert.equal(seri.startOffset, 13)
     assert.equal(seri.end, "/p[1]/strong[1]")
     assert.equal(seri.endOffset, 27)
-    assert.isTrue(seri instanceof SerializedRange)
 
-  it "toObject() returns a simple object", ->
-    obj = range.toObject()
-    assert.equal(obj.start, "/p/strong")
-    assert.equal(obj.startOffset, 13)
-    assert.equal(obj.end, "/p/strong")
-    assert.equal(obj.endOffset, 27)
-    assert.equal(JSON.stringify(obj), '{"start":"/p/strong","startOffset":13,"end":"/p/strong","endOffset":27}')
 
 describe "BrowserRange", ->
   range = null

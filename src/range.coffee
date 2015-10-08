@@ -77,14 +77,14 @@ serialize = (range, root, ignoreSelector) ->
   start = serialization(range.startContainer)
   end   = serialization(range.endContainer, true)
 
-  new SerializedRange({
+  return {
     # XPath strings
     start: start[0]
     end: end[0]
     # Character offsets (integer)
     startOffset: start[1]
     endOffset: end[1]
-  })
+  }
 
 
 
@@ -343,15 +343,6 @@ class SerializedRange
   # Returns an instance of SerializedRange.
   serialize: (root, ignoreSelector) ->
     this.normalize(root).serialize(root, ignoreSelector)
-
-  # Public: Returns the range as an Object literal.
-  toObject: ->
-    {
-      start: @start
-      startOffset: @startOffset
-      end: @end
-      endOffset: @endOffset
-    }
 
 
 # Export the above interface.
