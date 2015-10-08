@@ -82,32 +82,30 @@ class BrowserRange
       endContainer = firstLeaf(endContainer.childNodes[endOffset])
       endOffset = 0
 
-    # The above implies that a pre-order traversal visits every Node in the
-    # Range before visiting the last leaf of the end container.
-    first = firstLeaf(startContainer)
-
-    # Similarly, a pre-order traversal that reverses the children visits every
-    # Node in the Range before visiting the first leaf of the start container.
-    last = lastLeaf(endContainer)
-
     # Any TextNode in the traversal is valid unless excluded by the offset.
-    checkNode = (node) ->
+    isTextNodeInRange = (node) ->
       if not isTextNode(node) then return false
       if node is startContainer and startOffset > 0 then return false
       if node is endContainer and endOffset == 0 then return false
       return true
 
-    # Find the start and end TextNode.
-    checkStart = (node) ->
-      if checkNode(node) then start = node
-      return start or node is last
+    # Find the start TextNode.
+    # The guarantees above provide that a pre-order traversal visits every
+    # Node in the Range before visiting the last leaf of the end container.
+    node = startContainer
+    next = (node) -> node isnt last and preFirst(node) or null
+    last = lastLeaf(endContainer)
+    node = next(node) while not isTextNodeInRange(node)
+    start = node
 
-    checkEnd = (node) ->
-      if checkNode(node) then end = node
-      return end or node is start
-
-    someNode(startContainer, checkStart)
-    someNode(endContainer, checkEnd, preLast)
+    # Find the end TextNode.
+    # Similarly, a reverse pre-order traversal visits every Node in the Range
+    # before visiting the first leaf of the start container.
+    node = endContainer
+    next = (node) -> node isnt last and preLast(node) or null
+    last = firstLeaf(startContainer)
+    node = next(node) while not isTextNodeInRange(node)
+    end = node
 
     return new NormalizedRange({commonAncestor, start, end})
 
@@ -166,22 +164,18 @@ class NormalizedRange
     document = bounds.ownerDocument
 
     if not contains(bounds, @start)
-      start = null
+      node = bounds
+      next = (node) -> node isnt last and preFirst(node) or null
       last = lastLeaf(bounds)
-      checkStart = (node) ->
-        if isTextNode(node) then start = node
-        return start or node is last
-      someNode(bounds, checkStart)
-      @start = start
+      node = next(node) while not isTextNode(node)
+      @start = node
 
     if not contains(bounds, @end)
-      end = null
-      first = firstLeaf(bounds)
-      checkEnd = (node) ->
-        if isTextNode(node) then end = node
-        return end or node is first
-      someNode(bounds, checkEnd, preLast)
-      @end = end
+      node = bounds
+      next = (node) -> node isnt last and preLast(node) or null
+      last = firstLeaf(bounds)
+      node = next(node) while not isTextNode(node)
+      @end = node
 
     return null unless @start and @end
 
