@@ -86,19 +86,19 @@ class BrowserRange
       return true
 
     # Find the start TextNode.
-    # The guarantees above provide that a pre-order traversal visits every
+    # The guarantees above provide that a document order traversal visits every
     # Node in the Range before visiting the last leaf of the end container.
     node = startContainer
-    next = (node) -> node isnt last and preFirst(node) or null
+    next = (node) -> node isnt last and documentForward(node) or null
     last = lastLeaf(endContainer)
     node = next(node) while not isTextNodeInRange(node)
     start = node
 
     # Find the end TextNode.
-    # Similarly, a reverse pre-order traversal visits every Node in the Range
-    # before visiting the first leaf of the start container.
+    # Similarly, a reverse document order traversal visits every Node in the
+    # Range before visiting the first leaf of the start container.
     node = endContainer
-    next = (node) -> node isnt last and preLast(node) or null
+    next = (node) -> node isnt last and documentReverse(node) or null
     last = firstLeaf(startContainer)
     node = next(node) while not isTextNodeInRange(node)
     end = node
@@ -161,14 +161,14 @@ class NormalizedRange
 
     if not contains(bounds, @start)
       node = bounds
-      next = (node) -> node isnt last and preFirst(node) or null
+      next = (node) -> node isnt last and documentForward(node) or null
       last = lastLeaf(bounds)
       node = next(node) while not isTextNode(node)
       @start = node
 
     if not contains(bounds, @end)
       node = bounds
-      next = (node) -> node isnt last and preLast(node) or null
+      next = (node) -> node isnt last and documentReverse(node) or null
       last = firstLeaf(bounds)
       node = next(node) while not isTextNode(node)
       @end = node
@@ -333,15 +333,15 @@ class SerializedRange
 # The predicate function is invoked once for each Node in the tree.
 # An optional third argument specifies a traversal order and should be a
 # function that takes a Node and returns its successor. The default order is
-# DOM position order (pre-order).
-everyNode = (node, fn, next = preFirst) ->
+# document order.
+everyNode = (node, fn, next = documentForward) ->
   return !someNode(node, ((n) -> !fn(n)), next)
 
 
 # Return the first Node in the tree that matches the predicate.
 # An optional third argument specifies a traversal and should be a function
 # that returns the successor of its argument. The default is document order.
-findNode = (node, fn, next = preFirst) ->
+findNode = (node, fn, next = documentForward) ->
   node = next(node) while node? and not result = fn(node)
   return (if result then node else undefined)
 
@@ -349,14 +349,14 @@ findNode = (node, fn, next = preFirst) ->
 # Return true if the given predicate is true for any Node of the tree.
 # An optional third argument specifies a traversal and should be a function
 # that returns the successor of its argument. The default is document order.
-someNode = (node, fn, next = preFirst) ->
+someNode = (node, fn, next = documentForward) ->
   return !!findNode(node, fn, next)
 
 
 # Return an Array of each Node in the tree for which the predicate is true.
 # An optional third argument specifies a traversal and should be a function
 # that returns the successor of its argument. The default is document order.
-filterNode = (node, fn, next = preFirst) ->
+filterNode = (node, fn, next = documentForward) ->
   collect = (acc, n) -> if fn(n) then acc.concat([n]) else acc
   return reduceNode(node, collect, [], next)
 
@@ -364,21 +364,21 @@ filterNode = (node, fn, next = preFirst) ->
 # Return an Array of the result of applying a function to each Node in a tree.
 # An optional third argument specifies a traversal and should be a function
 # that returns the successor of its argument. The default is document order.
-mapNode = (node, fn, next = preFirst) ->
+mapNode = (node, fn, next = documentForward) ->
   return reduceNode(node, ((acc, n) -> acc.push(fn(n))), [], next)
 
 
-reduceNode = (node, fn, initialValue = undefined, next = preFirst) ->
+reduceNode = (node, fn, initialValue = undefined, next = documentForward) ->
   acc = initialValue
   last = lastLeaf(node)
   if arguments.length is 2
     if node is last then return node
     acc = node
-    node = preFirst(node)
+    node = documentForward(node)
   else
     acc = fn(acc, node)
 
-  while node = preFirst(node)
+  while node = documentForward(node)
     acc = fn(acc, node)
     if node is last then break
 
@@ -399,8 +399,9 @@ isTextNode = (node) ->
   return node.nodeType is TEXT_NODE
 
 
-# Return the next Node in a first-to-last-child pre-order traversal.
-preFirst = (node) ->
+# Return the next Node in a document order traversal.
+# This order is equivalent to a classic pre-order.
+documentForward = (node) ->
   if node.firstChild?
     return node.firstChild
 
@@ -411,8 +412,9 @@ preFirst = (node) ->
   return node.nextSibling
 
 
-# Return the next Node in a last-to-first-child pre-order traversal.
-preLast = (node) ->
+# Return the next Node in a reverse document order traversal.
+# This order is equivalent to pre-order with the child order reversed.
+documentReverse = (node) ->
   if node.lastChild?
     return node.lastChild
 
