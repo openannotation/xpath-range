@@ -100,11 +100,11 @@ class BrowserRange
     # Find the start and end TextNode.
     checkStart = (node) ->
       if checkNode(node) then start = node
-      return not (start or node is last)
+      return start or node is last
 
     checkEnd = (node) ->
       if checkNode(node) then end = node
-      return not (end or node is start)
+      return end or node is start
 
     someNode(startContainer, checkStart)
     someNode(endContainer, checkEnd, preLast)
@@ -170,7 +170,7 @@ class NormalizedRange
       last = lastLeaf(bounds)
       checkStart = (node) ->
         if isTextNode(node) then start = node
-        return not (start or node is last)
+        return start or node is last
       someNode(bounds, checkStart)
       @start = start
 
@@ -179,7 +179,7 @@ class NormalizedRange
       first = firstLeaf(bounds)
       checkEnd = (node) ->
         if isTextNode(node) then end = node
-        return not (end or node is first)
+        return end or node is first
       someNode(bounds, checkEnd, preLast)
       @end = end
 
@@ -339,29 +339,60 @@ class SerializedRange
     }
 
 
-# Return true if the given predicate is true for any Node of the tree.
+# Return true if the given predicate is true for every Node of the tree.
 # The predicate function is invoked once for each Node in the tree.
 # An optional third argument specifies a traversal order and should be a
 # function that takes a Node and returns its successor. The default order is
 # DOM position order (pre-order).
-someNode = (node, fn, successor = preFirst) ->
-  result = false
-  node = successor(node) while result = fn(node)
-  return result
+everyNode = (node, fn, next = preFirst) ->
+  return !someNode(node, ((n) -> !fn(n)), next)
+
+
+# Return the first Node in the tree that matches the predicate.
+# An optional third argument specifies a traversal and should be a function
+# that returns the successor of its argument. The default is document order.
+findNode = (node, fn, next = preFirst) ->
+  node = next(node) while node? and not result = fn(node)
+  return (if result then node else undefined)
+
+
+# Return true if the given predicate is true for any Node of the tree.
+# An optional third argument specifies a traversal and should be a function
+# that returns the successor of its argument. The default is document order.
+someNode = (node, fn, next = preFirst) ->
+  return !!findNode(node, fn, next)
 
 
 # Return an Array of each Node in the tree for which the predicate is true.
-filterNode = (root, fn = (-> true)) ->
-  result = []
-  last = lastLeaf(root)
+# An optional third argument specifies a traversal and should be a function
+# that returns the successor of its argument. The default is document order.
+filterNode = (node, fn, next = preFirst) ->
+  collect = (acc, n) -> if fn(n) then acc.concat([n]) else acc
+  return reduceNode(node, collect, [], next)
 
-  collect = (node) ->
-    if fn(node) then result.push(node)
-    return node isnt last
 
-  someNode(root, collect)
+# Return an Array of the result of applying a function to each Node in a tree.
+# An optional third argument specifies a traversal and should be a function
+# that returns the successor of its argument. The default is document order.
+mapNode = (node, fn, next = preFirst) ->
+  return reduceNode(node, ((acc, n) -> acc.push(fn(n))), [], next)
 
-  return result
+
+reduceNode = (node, fn, initialValue = undefined, next = preFirst) ->
+  acc = initialValue
+  last = lastLeaf(node)
+  if arguments.length is 2
+    if node is last then return node
+    acc = node
+    node = preFirst(node)
+  else
+    acc = fn(acc, node)
+
+  while node = preFirst(node)
+    acc = fn(acc, node)
+    if node is last then break
+
+  return acc
 
 
 # Split a TextNode at an offset, returning the successor.
