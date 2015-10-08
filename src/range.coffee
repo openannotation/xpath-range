@@ -52,6 +52,42 @@ normalizeBoundaries = (range) ->
   range.setEndAfter(node)
 
 
+serialize = (range, root, ignoreSelector) ->
+
+  serialization = (node, isEnd) ->
+    if ignoreSelector
+      filterFn = (node) -> not matches(node, ignoreSelector)
+      origParent = ancestors(node, filterFn)[0]
+    else
+      origParent = node.parentNode
+
+    path = xpath.fromNode(origParent, root)
+    textNodes = filterNode(origParent, isTextNode)
+
+    # Calculate real offset as the combined length of all the
+    # preceding textNode siblings. We include the length of the
+    # node if it's the end node.
+    nodes = textNodes.slice(0, textNodes.indexOf(node))
+    offset = 0
+    for n in nodes
+      offset += n.nodeValue.length
+
+    if isEnd then [path, offset + node.nodeValue.length] else [path, offset]
+
+  start = serialization(range.startContainer)
+  end   = serialization(range.endContainer, true)
+
+  new SerializedRange({
+    # XPath strings
+    start: start[0]
+    end: end[0]
+    # Character offsets (integer)
+    startOffset: start[1]
+    endOffset: end[1]
+  })
+
+
+
 splitBoundaries = (range) ->
   {startContainer, startOffset, endContainer, endOffset} = range
 
@@ -128,7 +164,8 @@ class BrowserRange
   #
   # Returns an instance of SerializedRange.
   serialize: (root, ignoreSelector) ->
-    this.normalize(root).serialize(root, ignoreSelector)
+    this.normalize()
+    return serialize(this, root, ignoreSelector)
 
 # Public: A normalised range is most commonly used throughout the annotator.
 # its the result of a deserialised SerializedRange or a BrowserRange with
@@ -205,38 +242,11 @@ class NormalizedRange
   #
   # Returns an instance of SerializedRange.
   serialize: (root, ignoreSelector) ->
-
-    serialization = (node, isEnd) ->
-      if ignoreSelector
-        filterFn = (node) -> not matches(node, ignoreSelector)
-        origParent = ancestors(node, filterFn)[0]
-      else
-        origParent = node.parentNode
-
-      path = xpath.fromNode(origParent, root)
-      textNodes = filterNode(origParent, isTextNode)
-
-      # Calculate real offset as the combined length of all the
-      # preceding textNode siblings. We include the length of the
-      # node if it's the end node.
-      nodes = textNodes.slice(0, textNodes.indexOf(node))
-      offset = 0
-      for n in nodes
-        offset += n.nodeValue.length
-
-      if isEnd then [path, offset + node.nodeValue.length] else [path, offset]
-
-    start = serialization(@start)
-    end   = serialization(@end, true)
-
-    new SerializedRange({
-      # XPath strings
-      start: start[0]
-      end: end[0]
-      # Character offsets (integer)
-      startOffset: start[1]
-      endOffset: end[1]
-    })
+    document = root.ownerDocument
+    range = document.createRange()
+    range.setStart(@start, 0)
+    range.setEnd(@end, @end.length)
+    return serialize(range, root, ignoreSelector)
 
   # Public: Creates a concatenated String of the contents of all the text nodes
   # within the range.
