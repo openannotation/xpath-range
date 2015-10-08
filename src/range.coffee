@@ -7,9 +7,9 @@ DOMException = require('./dom-exception')
 xpath = require('./xpath')
 
 # https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-ELEMENT_NODE = 1
 TEXT_NODE = 3
 
+# Public interface.
 
 normalizeBoundaries = (range) ->
   {startContainer, startOffset, endContainer, endOffset} = range
@@ -344,6 +344,18 @@ class SerializedRange
     }
 
 
+# Export the above interface.
+module.exports = {
+  BrowserRange
+  NormalizedRange
+  SerializedRange
+  normalizeBoundaries
+  splitBoundaries
+}
+
+
+# Private helpers.
+
 # Return true if the given predicate is true for every Node of the tree.
 # The predicate function is invoked once for each Node in the tree.
 # An optional third argument specifies a traversal order and should be a
@@ -457,13 +469,3 @@ commonAncestor = (node, other) ->
   while node? and not contains(node, other)
     node = node.parentNode
   return node
-
-
-# Export the public module interface.
-module.exports = {
-  BrowserRange
-  NormalizedRange
-  SerializedRange
-  normalizeBoundaries
-  splitBoundaries
-}
