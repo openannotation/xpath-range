@@ -11,6 +11,47 @@ ELEMENT_NODE = 1
 TEXT_NODE = 3
 
 
+normalizeBoundaries = (range) ->
+  {startContainer, startOffset, endContainer, endOffset} = range
+
+  # Move the start container to the last leaf before any sibling boundary,
+  # guaranteeing that any children of the container are within the range.
+  if startContainer.childNodes.length and startOffset > 0
+    startContainer = lastLeaf(startContainer.childNodes[startOffset-1])
+    startOffset = startContainer.length or startContainer.childNodes.length
+
+  # Move the end container to the first leaf after any sibling boundary,
+  # guaranteeing that any children of the container are within the range.
+  if endOffset < endContainer.childNodes.length
+    endContainer = firstLeaf(endContainer.childNodes[endOffset])
+    endOffset = 0
+
+  # Any TextNode in the traversal is valid unless excluded by the offset.
+  isTextNodeInRange = (node) ->
+    if not isTextNode(node) then return false
+    if node is startContainer and startOffset > 0 then return false
+    if node is endContainer and endOffset == 0 then return false
+    return true
+
+  # Find the start TextNode.
+  # The guarantees above provide that a document order traversal visits every
+  # Node in the Range before visiting the last leaf of the end container.
+  node = startContainer
+  next = (node) -> node isnt last and documentForward(node) or null
+  last = lastLeaf(endContainer)
+  node = next(node) while not isTextNodeInRange(node)
+  range.setStartBefore(node)
+
+  # Find the end TextNode.
+  # Similarly, a reverse document order traversal visits every Node in the
+  # Range before visiting the first leaf of the start container.
+  node = endContainer
+  next = (node) -> node isnt last and documentReverse(node) or null
+  last = firstLeaf(startContainer)
+  node = next(node) while not isTextNodeInRange(node)
+  range.setEndAfter(node)
+
+
 splitBoundaries = (range) ->
   {startContainer, startOffset, endContainer, endOffset} = range
 
@@ -49,61 +90,35 @@ class BrowserRange
     @endContainer            = obj.endContainer
     @endOffset               = obj.endOffset
 
-
   setStart: (@startContainer, @startOffset) ->
     @commonAncestorContainer = commonAncestor(@startContainer, @endContainer)
 
+  setStartBefore: (@startContainer) ->
+    @startOffset = 0
+
+  setStartAfter: (@startContainer) ->
+    @startOffset = @startContainer.length or @startContainer.childNodes.length
+
   setEnd: (@endContainer, @endOffset) ->
     @commonAncestorContainer = commonAncestor(@startContainer, @endContainer)
+
+  setEndBefore: (@endContainer) ->
+    @endOffset = 0
+
+  setEndAfter: (@endContainer) ->
+    @endOffset = @endContainer.length or @endContainer.childNodes.length
 
   # Public: Normalize the start and end to TextNode boundaries.
   #
   # Returns an instance of NormalizedRange
   normalize: (root) ->
     splitBoundaries(this)
-    commonAncestor = @commonAncestorContainer
-
-    # Get (a copy of) the boundaries of the range.
-    {startContainer, startOffset, endContainer, endOffset} = this
-
-    # Move the start container to the last leaf before any sibling boundary,
-    # guaranteeing that any children of the container are within the range.
-    if startContainer.childNodes.length and startOffset > 0
-      startContainer = lastLeaf(startContainer.childNodes[startOffset-1])
-      startOffset = startContainer.length or startContainer.childNodes.length
-
-    # Move the end container to the first leaf after any sibling boundary,
-    # guaranteeing that any children of the container are within the range.
-    if endOffset < endContainer.childNodes.length
-      endContainer = firstLeaf(endContainer.childNodes[endOffset])
-      endOffset = 0
-
-    # Any TextNode in the traversal is valid unless excluded by the offset.
-    isTextNodeInRange = (node) ->
-      if not isTextNode(node) then return false
-      if node is startContainer and startOffset > 0 then return false
-      if node is endContainer and endOffset == 0 then return false
-      return true
-
-    # Find the start TextNode.
-    # The guarantees above provide that a document order traversal visits every
-    # Node in the Range before visiting the last leaf of the end container.
-    node = startContainer
-    next = (node) -> node isnt last and documentForward(node) or null
-    last = lastLeaf(endContainer)
-    node = next(node) while not isTextNodeInRange(node)
-    start = node
-
-    # Find the end TextNode.
-    # Similarly, a reverse document order traversal visits every Node in the
-    # Range before visiting the first leaf of the start container.
-    node = endContainer
-    next = (node) -> node isnt last and documentReverse(node) or null
-    last = firstLeaf(startContainer)
-    node = next(node) while not isTextNodeInRange(node)
-    end = node
-
-    return new NormalizedRange({commonAncestor, start, end})
+    normalizeBoundaries(this)
+    return new NormalizedRange({
+      commonAncestor: @commonAncestorContainer
+      start: @startContainer,
+      end: @endContainer
+    })
 
   # Public: Creates a range suitable for storage.
   #
@@ -449,5 +464,6 @@ module.exports = {
   BrowserRange
   NormalizedRange
   SerializedRange
+  normalizeBoundaries
   splitBoundaries
 }
