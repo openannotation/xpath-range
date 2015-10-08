@@ -61,11 +61,7 @@ class BrowserRange
   # Returns an instance of NormalizedRange
   normalize: (root) ->
     splitBoundaries(this)
-
-    # Initialize the result.
     commonAncestor = @commonAncestorContainer
-    start = null
-    end = null
 
     # Get (a copy of) the boundaries of the range.
     {startContainer, startOffset, endContainer, endOffset} = this
