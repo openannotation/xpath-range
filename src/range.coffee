@@ -71,6 +71,24 @@ normalizeBoundaries = (range) ->
   range.setEnd(end, end.length)
 
 
+splitBoundaries = (range) ->
+  {startContainer, startOffset, endContainer, endOffset} = range
+
+  if isTextNode(endContainer)
+    if 0 < endOffset < endContainer.length
+      endContainer = splitText(endContainer, endOffset)
+      range.setEnd(endContainer, 0)
+
+  if isTextNode(startContainer)
+    if 0 < startOffset < startContainer.length
+      if startContainer is endContainer
+        startContainer = splitText(startContainer, startOffset)
+        range.setEnd(startContainer, endOffset - startOffset)
+      else
+        startContainer = splitText(startContainer, startOffset)
+      range.setStart(startContainer, 0)
+
+
 deserialize = (root, startPath, startOffset, endPath, endOffset) ->
   document = root.ownerDocument
   range = document.createRange()
@@ -140,24 +158,6 @@ serialize = (range, root, ignoreSelector) ->
     startOffset: start[1]
     endOffset: end[1]
   }
-
-
-splitBoundaries = (range) ->
-  {startContainer, startOffset, endContainer, endOffset} = range
-
-  if isTextNode(endContainer)
-    if 0 < endOffset < endContainer.length
-      endContainer = splitText(endContainer, endOffset)
-      range.setEnd(endContainer, 0)
-
-  if isTextNode(startContainer)
-    if 0 < startOffset < startContainer.length
-      if startContainer is endContainer
-        startContainer = splitText(startContainer, startOffset)
-        range.setEnd(startContainer, endOffset - startOffset)
-      else
-        startContainer = splitText(startContainer, startOffset)
-      range.setStart(startContainer, 0)
 
 
 # Export the above interface.
