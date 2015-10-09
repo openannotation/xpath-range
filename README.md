@@ -4,9 +4,11 @@
 
 This module is for describing and resolving a DOM `Range` using XPath.
 
-## Usage
+## Installation
 
-You can install `xpath-range` by executing `npm intall xpath-range`.
+Use `npm install xpath-range`.
+
+## Usage
 
     TODO: The API is not finalized.
 
