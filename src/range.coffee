@@ -173,15 +173,6 @@ module.exports = {
 
 # Private helpers.
 
-# Return true if the given predicate is true for every Node of the tree.
-# The predicate function is invoked once for each Node in the tree.
-# An optional third argument specifies a traversal order and should be a
-# function that takes a Node and returns its successor. The default order is
-# document order.
-everyNode = (node, fn, next = documentForward) ->
-  return !someNode(node, ((n) -> !fn(n)), next)
-
-
 # Return the first Node in the tree that matches the predicate.
 # An optional third argument specifies a traversal and should be a function
 # that returns the successor of its argument. The default is document order.
@@ -190,26 +181,12 @@ findNode = (node, fn, next = documentForward) ->
   return (if result then node else undefined)
 
 
-# Return true if the given predicate is true for any Node of the tree.
-# An optional third argument specifies a traversal and should be a function
-# that returns the successor of its argument. The default is document order.
-someNode = (node, fn, next = documentForward) ->
-  return !!findNode(node, fn, next)
-
-
 # Return an Array of each Node in the tree for which the predicate is true.
 # An optional third argument specifies a traversal and should be a function
 # that returns the successor of its argument. The default is document order.
 filterNode = (node, fn, next = documentForward) ->
   collect = (acc, n) -> if fn(n) then acc.concat([n]) else acc
   return reduceNode(node, collect, [], next)
-
-
-# Return an Array of the result of applying a function to each Node in a tree.
-# An optional third argument specifies a traversal and should be a function
-# that returns the successor of its argument. The default is document order.
-mapNode = (node, fn, next = documentForward) ->
-  return reduceNode(node, ((acc, n) -> acc.push(fn(n))), [], next)
 
 
 reduceNode = (node, fn, initialValue = undefined, next = documentForward) ->
@@ -278,11 +255,4 @@ firstLeaf = (node) ->
 # Find the last leaf node.
 lastLeaf = (node) ->
   node = node.lastChild while node.hasChildNodes()
-  return node
-
-
-# Find a common ancestor Node.
-commonAncestor = (node, other) ->
-  while node? and not contains(node, other)
-    node = node.parentNode
   return node
