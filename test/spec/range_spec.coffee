@@ -1,6 +1,5 @@
-{NormalizedRange} = require('../../src/range')
 {normalizeBoundaries, splitBoundaries} = require('../../src/range')
-{serialize, deserialize} = require('../../src/range')
+{limit, serialize, deserialize} = require('../../src/range')
 xpath = require('../../src/xpath')
 
 createRange = (i) ->
@@ -119,103 +118,86 @@ describe "normalizing a Range", ->
   for i in [0...testData.length]
     it "should parse test range #{i} (#{testData[i][5]})", testNormalization(i)
 
-describe "NormalizedRange", ->
+describe "limit", ->
   range = null
+  headText = null
+  paraText = null
+  paraText2 = null
+  paraText3 = null
+  para2Text = null
+  para = null
+  root = null
 
   beforeEach ->
-    fixture.load('range.html')
-    range = createRange(7)
-    splitBoundaries(range)
-    normalizeBoundaries(range)
+    headText  = document.createTextNode("My Heading")
+    paraText  = document.createTextNode("My paragraph")
+    paraText2 = document.createTextNode(" conti")
+    paraText3 = document.createTextNode("nues")
+    para2Text = document.createTextNode("Another paragraph begins")
 
-  afterEach ->
-    fixture.cleanup()
+    head = document.createElement('h1')
+    head.appendChild(headText)
+    para = document.createElement('p')
+    para.appendChild(paraText)
+    span = document.createElement('span')
+    span.appendChild(paraText2)
+    span.appendChild(paraText3)
+    para.appendChild(span)
+    para2 = document.createElement('p')
+    para2.appendChild(para2Text)
 
-  describe "limit", ->
-    headText = null
-    paraText = null
-    paraText2 = null
-    paraText3 = null
-    para2Text = null
-    para = null
-    root = null
+    root = document.createElement('div')
+    root.appendChild(head)
+    root.appendChild(para)
+    root.appendChild(para2)
 
-    beforeEach ->
-      headText  = document.createTextNode("My Heading")
-      paraText  = document.createTextNode("My paragraph")
-      paraText2 = document.createTextNode(" conti")
-      paraText3 = document.createTextNode("nues")
-      para2Text = document.createTextNode("Another paragraph begins")
+  it "should be a no-op if all nodes are within the bounding element.", ->
+    range = document.createRange()
+    range.setStart(paraText, 0)
+    range.setEnd(paraText2, paraText2.length)
+    limit(range, para)
+    assert.equal(range.commonAncestorContainer, para)
+    assert.equal(range.startContainer, paraText)
+    assert.equal(range.startOffset, 0)
+    assert.equal(range.endContainer, paraText2)
+    assert.equal(range.endOffset, paraText2.length)
 
-      head = document.createElement('h1')
-      head.appendChild(headText)
-      para = document.createElement('p')
-      para.appendChild(paraText)
-      span = document.createElement('span')
-      span.appendChild(paraText2)
-      span.appendChild(paraText3)
-      para.appendChild(span)
-      para2 = document.createElement('p')
-      para2.appendChild(para2Text)
+  it "should exclude any nodes to the left of the bounding element.", ->
+    range = document.createRange()
+    range.setStart(headText, 0)
+    range.setEnd(paraText2, paraText2.length)
+    limit(range, para)
+    assert.equal(range.commonAncestorContainer, para)
+    assert.equal(range.startContainer, para)
+    assert.equal(range.startOffset, 0)
+    assert.equal(range.endContainer, paraText2)
+    assert.equal(range.endOffset, paraText2.length)
 
-      root = document.createElement('div')
-      root.appendChild(head)
-      root.appendChild(para)
-      root.appendChild(para2)
+  it "should exclude any nodes to the right of the bounding element.", ->
+    range = document.createRange()
+    range.setStart(paraText, paraText.length)
+    range.setEnd(para2Text, para2Text.length)
+    limit(range, para)
+    assert.equal(range.commonAncestorContainer, para)
+    assert.equal(range.startContainer, paraText)
+    assert.equal(range.startOffset, paraText.length)
+    assert.equal(range.endContainer, para)
+    assert.equal(range.endOffset, para.childNodes.length)
 
-    it "should be a no-op if all nodes are within the bounding element.", ->
-      range = new NormalizedRange({
-        commonAncestor: para
-        start: paraText
-        end: paraText2
-      })
+  it "should exclude any nodes on either side of the bounding element.", ->
+    range = document.createRange()
+    range.setStart(headText, 0)
+    range.setEnd(para2Text, para2Text.length)
+    limit(range, para)
+    assert.equal(range.commonAncestorContainer, para)
+    assert.equal(range.startContainer, para)
+    assert.equal(range.startOffset, 0)
+    assert.equal(range.endContainer, para)
+    assert.equal(range.endOffset, para.childNodes.length)
 
-      range = range.limit(para)
-      assert.equal(range.commonAncestor, para)
-      assert.equal(range.start, paraText)
-      assert.equal(range.end, paraText2)
-
-    it "should exclude any nodes to the left of the bounding element.", ->
-      range = new NormalizedRange({
-        commonAncestor: root
-        start: headText
-        end: paraText2
-      })
-
-      range = range.limit(para)
-      assert.equal(range.commonAncestor, para)
-      assert.equal(range.start, paraText)
-      assert.equal(range.end, paraText2)
-
-    it "should exclude any nodes to the right of the bounding element.", ->
-      range = new NormalizedRange({
-        commonAncestor: root
-        start: paraText
-        end: para2Text
-      })
-
-      range = range.limit(para)
-      assert.equal(range.commonAncestor, para)
-      assert.equal(range.start, paraText)
-      assert.equal(range.end, paraText3)
-
-    it "should exclude any nodes on either side of the bounding element.", ->
-      range = new NormalizedRange({
-        commonAncestor: root
-        start: headText
-        end: para2Text
-      })
-
-      range = range.limit(para)
-      assert.equal(range.commonAncestor, para)
-      assert.equal(range.start, paraText)
-      assert.equal(range.end, paraText3)
-
-    it "should return null if no nodes fall within the bounds", ->
-      otherDiv = document.createElement('div')
-      range = new NormalizedRange({
-        commonAncestor: root
-        start: headText
-        end: paraText2
-      })
-      assert.equal(range.limit(otherDiv), null)
+  it "should return null if no nodes fall within the bounds", ->
+    otherDiv = document.createElement('div')
+    range = document.createRange()
+    range.setStart(headText, 0)
+    range.setEnd(paraText2, paraText2.length)
+    assert.equal(limit(range, otherDiv), null)

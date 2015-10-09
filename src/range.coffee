@@ -161,98 +161,15 @@ splitBoundaries = (range) ->
       range.setStart(startContainer, 0)
 
 
-# Public: A normalised range is most commonly used throughout the annotator.
-# its the result of a deserialised SerializedRange or a browser Range with
-# out browser inconsistencies.
-class NormalizedRange
-
-  # Public: Creates an instance of a NormalizedRange.
-  #
-  # This is usually created by calling the .normalize() method on one of the
-  # other Range classes rather than manually.
-  #
-  # obj - An Object literal. Should have the following properties.
-  #       commonAncestor: A Node that contains the start Node and end Node.
-  #       start:          The first TextNode in the range.
-  #       end             The last TextNode in the range.
-  #
-  # Returns an instance of NormalizedRange.
-  constructor: (obj) ->
-    @commonAncestor = obj.commonAncestor
-    @start          = obj.start
-    @end            = obj.end
-
-  # Public: For API consistency.
-  #
-  # Returns itself.
-  normalize: (root) ->
-    this
-
-  # Public: Limits the nodes within the NormalizedRange to those contained
-  # withing the bounds parameter. It returns an updated range with all
-  # properties updated. NOTE: Method returns null if all nodes fall outside
-  # of the bounds.
-  #
-  # bounds - An Element to limit the range to.
-  #
-  # Returns updated self or null.
-  limit: (bounds) ->
-    range = document.createRange()
-    range.setStart(@start, 0)
-    range.setEnd(@end, @end.length)
-    limit(range, bounds)
-
-    try
-      normalizeBoundaries(range)
-      @commonAncestor = range.commonAncestorContainer
-      @start = range.startContainer
-      @end = range.endContainer
-      return this
-    catch
-      return null
-
-  # Convert this range into an object consisting of two pairs of (xpath,
-  # character offset), which can be easily stored in a database.
-  #
-  # root - The root Element relative to which XPaths should be calculated
-  # ignoreSelector - A selector String of elements to ignore. For example
-  #                  elements injected by the annotator.
-  #
-  # Returns an instance of SerializedRange.
-  serialize: (root, ignoreSelector) ->
-    document = root.ownerDocument
-    range = document.createRange()
-    range.setStart(@start, 0)
-    range.setEnd(@end, @end.length)
-    return serialize(range, root, ignoreSelector)
-
-  # Public: Creates a concatenated String of the contents of all the text nodes
-  # within the range.
-  #
-  # Returns a String.
-  text: ->
-    (for node in this.textNodes()
-      node.nodeValue
-    ).join ''
-
-  # Public: Fetches only the text nodes within the range.
-  #
-  # Returns an Array of TextNode instances.
-  textNodes: ->
-    textNodes = filterNode(this.commonAncestor, isTextNode)
-    [start, end] = [textNodes.indexOf(this.start), textNodes.indexOf(this.end)]
-    # Return the textNodes that fall between the start and end indexes.
-    return textNodes[start..end]
-
-
 # Export the above interface.
 module.exports = {
-  NormalizedRange
   normalizeBoundaries
   splitBoundaries
+  limit
   serialize
   deserialize
 }
+
 
 # Private helpers.
 
