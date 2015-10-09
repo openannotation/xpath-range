@@ -106,7 +106,6 @@ deserialize = (root, startPath, startOffset, endPath, endOffset) ->
   return range
 
 
-
 serialize = (range, root, ignoreSelector) ->
 
   serialization = (node, isEnd) ->
