@@ -52,6 +52,42 @@ normalizeBoundaries = (range) ->
   range.setEndAfter(node)
 
 
+deserialize = (root, startPath, startOffset, endPath, endOffset) ->
+  document = root.ownerDocument
+  range = document.createRange()
+
+  findBoundary = (path, offset) ->
+    node = xpath.toNode(path, root)
+
+    if not node?
+      message = 'Node was not found.'
+      name = 'NotFoundError'
+      throw new DOMException(message, name)
+
+    # Unfortunately, we *can't* guarantee only one TextNode per Element, so
+    # process each TextNode until their combined length exceeds or matches the
+    # value of the offset.
+    for tn in filterNode(node, isTextNode)
+      if (tn.length >= offset)
+        return {container: tn, offset: offset}
+      else
+        offset -= tn.length
+
+    # Throw an error because the offset is too large.
+    message = "There is no text at the requested offset."
+    name = "IndexSizeError"
+    throw new DOMException(message, name)
+
+  start = findBoundary(startPath, startOffset)
+  end = findBoundary(endPath, endOffset)
+
+  range.setStart(start.container, start.offset)
+  range.setEnd(end.container, end.offset)
+
+  return range
+
+
+
 serialize = (range, root, ignoreSelector) ->
 
   serialization = (node, isEnd) ->
@@ -292,47 +328,8 @@ class SerializedRange
   #
   # Returns a NormalizedRange instance.
   normalize: (root) ->
-    range = {}
-
-    for p in ['start', 'end']
-      node = xpath.toNode(this[p], root)
-
-      if not node?
-        message = 'Node was not found.'
-        name = 'NotFoundError'
-        throw new DOMException(message, name)
-
-      # Unfortunately, we *can't* guarantee only one textNode per
-      # elementNode, so we have to walk along the element's textNodes until
-      # the combined length of the textNodes to that point exceeds or
-      # matches the value of the offset.
-      length = 0
-      targetOffset = this[p + 'Offset']
-
-      # Range excludes its endpoint because it describes the boundary position.
-      # Target the string index of the last character inside the range.
-      if p is 'end' then targetOffset -= 1
-
-      for tn in filterNode(node, isTextNode)
-        if (length + tn.nodeValue.length > targetOffset)
-          range[p + 'Container'] = tn
-          range[p + 'Offset'] = this[p + 'Offset'] - length
-          break
-        else
-          length += tn.nodeValue.length
-
-      # If we fall off the end of the for loop without having set
-      # 'startOffset'/'endOffset', the element has shorter content than when
-      # we annotated, so throw an error:
-      if not range[p + 'Offset']?
-        message = "There is no text at offset #{this[p + 'Offset']}."
-        name = "IndexSizeError"
-        throw new DOMException(message, name)
-
-    range.commonAncestorContainer = commonAncestor(
-      range.startContainer, range.endContainer)
-
-    new BrowserRange(range).normalize(root)
+    range = deserialize(root, @start, @startOffset, @end, @endOffset)
+    return new BrowserRange(range).normalize(root)
 
   # Public: Creates a range suitable for storage.
   #
