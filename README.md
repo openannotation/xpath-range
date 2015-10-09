@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/openannotation/xpath-range.svg?branch=master)](https://travis-ci.org/openannotation/xpath-range)
 
-This module is for in describing and resolving a DOM `Range` using XPath.
+This module is for describing and resolving a DOM `Range` using XPath.
 
 ## Usage
 
