@@ -9,6 +9,7 @@ xpath = require('./xpath')
 # https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
 TEXT_NODE = 3
 
+
 # Public interface.
 
 limit = (range, bounds) ->
@@ -140,7 +141,6 @@ serialize = (range, root, ignoreSelector) ->
     startOffset: start[1]
     endOffset: end[1]
   }
-
 
 
 splitBoundaries = (range) ->
