@@ -40,7 +40,7 @@ normalizeBoundaries = (range) ->
   next = (node) -> node isnt last and documentForward(node) or null
   last = lastLeaf(endContainer)
   node = next(node) while not isTextNodeInRange(node)
-  range.setStartBefore(node)
+  start = node
 
   # Find the end TextNode.
   # Similarly, a reverse document order traversal visits every Node in the
@@ -49,7 +49,10 @@ normalizeBoundaries = (range) ->
   next = (node) -> node isnt last and documentReverse(node) or null
   last = firstLeaf(startContainer)
   node = next(node) while not isTextNodeInRange(node)
-  range.setEndAfter(node)
+  end = node
+
+  range.setStart(start, 0)
+  range.setEnd(end, end.length)
 
 
 deserialize = (root, startPath, startOffset, endPath, endOffset) ->
