@@ -4,8 +4,7 @@
 
 ## Introduction
 
-The `xpath-range` module provides tools for working with a browser `Range`
-and describing/resolving a `Range` using XPath.
+This module is for in describing and resolving a DOM `Range` using XPath.
 
 ## Usage
 
