@@ -59,7 +59,7 @@ deserialize = (root, startPath, startOffset, endPath, endOffset) ->
   document = root.ownerDocument
   range = document.createRange()
 
-  findBoundary = (path, offset) ->
+  findBoundary = (path, offset, isEnd) ->
     node = xpath.toNode(path, root)
 
     if not node?
@@ -71,7 +71,7 @@ deserialize = (root, startPath, startOffset, endPath, endOffset) ->
     # process each TextNode until their combined length exceeds or matches the
     # value of the offset.
     for tn in filterNode(node, isTextNode)
-      if (tn.length >= offset)
+      if (isEnd and tn.length == offset) or (offset < tn.length)
         return {container: tn, offset: offset}
       else
         offset -= tn.length
@@ -81,8 +81,8 @@ deserialize = (root, startPath, startOffset, endPath, endOffset) ->
     name = "IndexSizeError"
     throw new DOMException(message, name)
 
-  start = findBoundary(startPath, startOffset)
-  end = findBoundary(endPath, endOffset)
+  start = findBoundary(startPath, startOffset, false)
+  end = findBoundary(endPath, endOffset, true)
 
   range.setStart(start.container, start.offset)
   range.setEnd(end.container, end.offset)
@@ -104,14 +104,15 @@ serialize = (range, root, ignoreSelector) ->
     textNodes = filterNode(origParent, isTextNode)
 
     # Calculate real offset as the combined length of all the
-    # preceding textNode siblings. We include the length of the
-    # node if it's the end node.
-    nodes = textNodes.slice(0, textNodes.indexOf(node))
-    offset = 0
-    for n in nodes
-      offset += n.nodeValue.length
+    # preceding TextNode siblings, plus the node itself if it is the end.
+    index = textNodes.indexOf(node)
+    if isEnd then index++
 
-    if isEnd then [path, offset + node.nodeValue.length] else [path, offset]
+    offset = 0
+    for node in textNodes.slice(0, index)
+      offset += node.length
+
+    return [path, offset]
 
   start = serialization(range.startContainer)
   end   = serialization(range.endContainer, true)
