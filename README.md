@@ -20,7 +20,13 @@ Don't forget to add/modify test cases to cover your change.
 
 ## Testing
 
-You can run the command-line test suite by executing `npm test`, or you can launch the development environment using `npm start', and then point your browser to http://localhost:4000/test/runner.html
+You can run the command-line test suite by executing `npm test`.
+
+To run the test suite in a browser, install the karma test runner
+
+    npm install -g karma-cli
+
+and then run `karma start` and it will print directions for debugging.
 
 ## Maintainers
 
