@@ -245,60 +245,15 @@ class NormalizedRange
     # Return the textNodes that fall between the start and end indexes.
     return textNodes[start..end]
 
-# Public: A range suitable for storing in local storage or serializing to JSON.
-class SerializedRange
-
-  # Public: Creates a SerializedRange
-  #
-  # obj - The stored object. It should have the following properties.
-  #       start:       An xpath to the Element containing the first TextNode
-  #                    relative to the root Element.
-  #       startOffset: The offset to the start of the selection from obj.start.
-  #       end:         An xpath to the Element containing the last TextNode
-  #                    relative to the root Element.
-  #       startOffset: The offset to the end of the selection from obj.end.
-  #
-  # Returns an instance of SerializedRange
-  constructor: (obj) ->
-    @start       = obj.start
-    @startOffset = obj.startOffset
-    @end         = obj.end
-    @endOffset   = obj.endOffset
-
-  # Public: Creates a NormalizedRange.
-  #
-  # root - The root Element from which the XPaths were generated.
-  #
-  # Returns a NormalizedRange instance.
-  normalize: (root) ->
-    range = deserialize(root, @start, @startOffset, @end, @endOffset)
-    splitBoundaries(range)
-    normalizeBoundaries(range)
-    return new NormalizedRange({
-      commonAncestor: range.commonAncestorContainer,
-      start: range.startContainer,
-      end: range.endContainer
-    })
-
-  # Public: Creates a range suitable for storage.
-  #
-  # root           - A root Element from which to anchor the serialisation.
-  # ignoreSelector - A selector String of elements to ignore. For example
-  #                  elements injected by the annotator.
-  #
-  # Returns an instance of SerializedRange.
-  serialize: (root, ignoreSelector) ->
-    this.normalize(root).serialize(root, ignoreSelector)
-
 
 # Export the above interface.
 module.exports = {
   NormalizedRange
-  SerializedRange
   normalizeBoundaries
   splitBoundaries
+  serialize
+  deserialize
 }
-
 
 # Private helpers.
 

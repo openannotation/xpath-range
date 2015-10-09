@@ -1,5 +1,6 @@
-{NormalizedRange, SerializedRange} = require('../../src/range')
+{NormalizedRange} = require('../../src/range')
 {normalizeBoundaries, splitBoundaries} = require('../../src/range')
+{serialize, deserialize} = require('../../src/range')
 xpath = require('../../src/xpath')
 
 createRange = (i) ->
@@ -45,69 +46,61 @@ testData = [
   [ "/p[1]/em[1]/text()[1]", 20, "/p[1]",           3, "vitae est.",                         "Text with end at sibling boundary."]
 ]
 
-describe "SerializedRange", ->
-  range = null
+describe "deserialize", ->
 
   beforeEach ->
     fixture.load('range.html')
-    range = new SerializedRange
-      start: "/p/strong"
-      startOffset: 13
-      end: "/p/strong"
-      endOffset: 27
 
   afterEach ->
     fixture.cleanup()
 
-  describe "normalize", ->
-    it "should return a normalized range", ->
-      norm = range.normalize(fixture.el)
-      assert.isTrue(norm instanceof NormalizedRange)
-      assert.equal(norm.text(), "habitant morbi")
+  it "should return a range", ->
+    range = deserialize(fixture.el, '/p/strong', 13, '/p/strong', 27)
+    assert.equal(range.toString(), "habitant morbi")
 
-    it "should return a normalized range with 0 offsets", ->
-      range.startOffset = 0
-      norm = range.normalize(fixture.el)
-      assert.isTrue(norm instanceof NormalizedRange)
-      assert.equal(norm.text(), "Pellentesque habitant morbi")
+  it "should return a range with 0 offsets", ->
+    range = deserialize(fixture.el, '/p/strong', 0, '/p/strong', 27)
+    assert.equal(range.toString(), "Pellentesque habitant morbi")
 
-    it "with the start property == first text node in the range", ->
-      # Split the targeted text ("Pellentesque...tristique") into textnodes of
-      # width 1.
-      node = fixture.el.firstChild.firstChild.firstChild
-      while node.data.length > 1
-        node = node.splitText(1)
+  it "should return a range that starts and ends in a TextNode", ->
+    # Split the targeted text ("Pellentesque...tristique").
+    node = fixture.el.firstChild.firstChild.firstChild
+    while node.data.length > 1
+      node = node.splitText(1)
 
-      norm = range.normalize(fixture.el)
-      assert.equal(norm.start.data, 'h')
+    range = deserialize(fixture.el, '/p/strong', 13, '/p/strong', 27)
+    assert.equal(range.startContainer.data, 'h')
+    assert.equal(range.endContainer.data, 'i')
 
-    it "with the end property == last text node (inclusive) of the range", ->
-      # Split the targeted text ("Pellentesque...tristique") into textnodes of
-      # width 1.
-      node = fixture.el.firstChild.firstChild.firstChild
-      while node.data.length > 1
-        node = node.splitText(1)
+  it "should raise NotFoundError if a node cannot be found", ->
+    root = document.createElement('div')
+    check = -> deserialize(root, '/p/strong', 13, '/p/strong', 27)
+    assert.throw(check, 'NotFoundError')
 
-      norm = range.normalize(fixture.el)
-      assert.equal(norm.end.data, 'i')
+  it "should raise IndexSizeError if an offset is too large", ->
+    check = -> deserialize(fixture.el, '/p/strong', 13, '/p/strong', 1000)
+    assert.throw(check, 'IndexSizeError')
 
-    it "should raise NotFoundError if a node cannot be found", ->
-      root = document.createElement('div')
-      check = -> range.normalize(root)
-      assert.throw(check, 'NotFoundError')
+describe "serialize", ->
 
-    it "should raise IndexSizeError if an offset is too large", ->
-      range.endOffset = 1000
-      check = -> range.normalize(fixture.el)
-      assert.throw(check, 'IndexSizeError')
+  beforeEach ->
+    fixture.load('range.html')
+
+  afterEach ->
+    fixture.cleanup()
 
   it "serialize() returns a serialized range", ->
-    seri = range.serialize(fixture.el)
+    text = fixture.el.getElementsByTagName('strong')[0].firstChild
+    range = document.createRange()
+    range.setStart(text, 13)
+    range.setEnd(text, 27)
+    splitBoundaries(range)
+    normalizeBoundaries(range)
+    seri = serialize(range, fixture.el)
     assert.equal(seri.start, "/p[1]/strong[1]")
     assert.equal(seri.startOffset, 13)
     assert.equal(seri.end, "/p[1]/strong[1]")
     assert.equal(seri.endOffset, 27)
-
 
 describe "normalizing a Range", ->
   beforeEach ->
