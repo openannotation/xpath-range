@@ -39,7 +39,7 @@ normalizeBoundaries = (range) ->
   node = startContainer
   next = (node) -> node isnt last and documentForward(node) or null
   last = lastLeaf(endContainer)
-  node = next(node) while not isTextNodeInRange(node)
+  node = next(node) while node? and not isTextNodeInRange(node)
   start = node
 
   # Find the end TextNode.
@@ -48,7 +48,7 @@ normalizeBoundaries = (range) ->
   node = endContainer
   next = (node) -> node isnt last and documentReverse(node) or null
   last = firstLeaf(startContainer)
-  node = next(node) while not isTextNodeInRange(node)
+  node = next(node) while node? and not isTextNodeInRange(node)
   end = node
 
   range.setStart(start, 0)
