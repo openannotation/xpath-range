@@ -1,4 +1,5 @@
-{BrowserRange, NormalizedRange, SerializedRange} = require('../../src/range')
+{NormalizedRange, SerializedRange} = require('../../src/range')
+{normalizeBoundaries, splitBoundaries} = require('../../src/range')
 xpath = require('../../src/xpath')
 
 createRange = (i) ->
@@ -108,30 +109,22 @@ describe "SerializedRange", ->
     assert.equal(seri.endOffset, 27)
 
 
-describe "BrowserRange", ->
-  range = null
-
+describe "normalizing a Range", ->
   beforeEach ->
     fixture.load('range.html')
-    range = createRange(0)
-    range = new BrowserRange(range)
 
   afterEach ->
     fixture.cleanup()
 
-  it "normalize() returns a normalized range", ->
-    norm = range.normalize()
-    assert.instanceOf(norm, NormalizedRange)
-
-  testBrowserRange = (i) ->
+  testNormalization = (i) ->
     ->
       range = createRange(i)
-      range = new BrowserRange(range)
-      norm  = range.normalize(fixture.el)
-      assert.equal(norm.text(), testData[i][4], testData[i][5])
+      splitBoundaries(range)
+      normalizeBoundaries(range)
+      assert.equal(range.toString(), testData[i][4], testData[i][5])
 
   for i in [0...testData.length]
-    it "should parse test range #{i} (#{testData[i][5]})", testBrowserRange(i)
+    it "should parse test range #{i} (#{testData[i][5]})", testNormalization(i)
 
 describe "NormalizedRange", ->
   range = null
@@ -139,23 +132,11 @@ describe "NormalizedRange", ->
   beforeEach ->
     fixture.load('range.html')
     range = createRange(7)
-    range = new BrowserRange(range)
-    range = range.normalize()
+    splitBoundaries(range)
+    normalizeBoundaries(range)
 
   afterEach ->
     fixture.cleanup()
-
-  it "textNodes() returns an array of textNodes", ->
-    textNodes = range.textNodes()
-
-    assert.isArray(textNodes)
-    assert.lengthOf(textNodes, testData[7][3])
-
-    # Should contain the contents of the first <strong> element.
-    assert.equal(textNodes[0].nodeValue, 'Pellentesque habitant morbi tristique')
-
-  it "text() returns the textual contents of the range", ->
-    assert.equal(range.text(), testData[7][4])
 
   describe "limit", ->
     headText = null
@@ -245,73 +226,3 @@ describe "NormalizedRange", ->
         end: paraText2
       })
       assert.equal(range.limit(otherDiv), null)
-
-  describe 'textNodes', ->
-
-    beforeEach ->
-      fixture.load('textnodes.html')
-
-    afterEach ->
-      fixture.cleanup()
-
-    it "returns an element's textNode descendants", ->
-      range = new BrowserRange({
-        commonAncestorContainer: fixture.el
-        startContainer: fixture.el
-        startOffset: 0
-        endContainer: fixture.el
-        endOffset: fixture.el.childNodes.length
-      })
-
-      range = range.normalize(fixture.el)
-      nodes = range.textNodes()
-      text = (node.nodeValue for node in nodes)
-
-      expectation = [ '\n  '
-                    , 'lorem ipsum'
-                    , '\n  '
-                    , 'dolor sit'
-                    , '\n'
-                    , 'dolor sit '
-                    , 'amet'
-                    , '. humpty dumpty. etc.'
-                    ]
-
-      assert.deepEqual(text, expectation)
-
-    it "returns an element's TextNodes after Text.splitText() text has been called", ->
-      # Build a very csutom fixture to replicate an issue in IE9 where calling
-      # split text on an text node does not update the parents .childNodes value
-      # which continues to return the unsplit text node.
-      fixture.cleanup()
-
-      para = document.createElement('p')
-      text = document.createTextNode('this is a paragraph of text')
-      para.appendChild(text)
-      fixture.el.appendChild(para)
-
-      assert.lengthOf(para.childNodes, 1)
-      first = text.splitText(14)
-
-      # Some basic assertions on the split text.
-      assert.equal(first.nodeValue, 'graph of text')
-      assert.equal(text.nodeValue, 'this is a para')
-      assert.equal(para.firstChild.nodeValue, 'this is a para')
-      assert.equal(para.lastChild.nodeValue, 'graph of text')
-
-      # Both of the following tests fail in IE9 so we cannot rely on the
-      # Text.childNodes property or jQuery.fn.contents() to retrieve the text
-      # nodes.
-      # assert.lengthOf(para.childNodes, 2)
-      # assert.lengthOf($(para).contents(), 2)
-
-      range = new BrowserRange({
-        commonAncestorContainer: para,
-        startContainer: para,
-        startOffset: 0,
-        endContainer: para,
-        endOffset: para.childNodes.length
-      })
-      range = range.normalize(para)
-      textNodes = range.textNodes()
-      assert.lengthOf(textNodes, 2)

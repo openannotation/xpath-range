@@ -145,69 +145,8 @@ splitBoundaries = (range) ->
       range.setStart(startContainer, 0)
 
 
-# Public: Creates a wrapper around a range object obtained from a DOMSelection.
-class BrowserRange
-
-  # Public: Creates an instance of BrowserRange.
-  #
-  # object - A range object obtained via DOMSelection#getRangeAt().
-  #
-  # Examples
-  #
-  #   selection = window.getSelection()
-  #   range = new BrowserRange(selection.getRangeAt(0))
-  #
-  # Returns an instance of BrowserRange.
-  constructor: (obj) ->
-    @commonAncestorContainer = obj.commonAncestorContainer
-    @startContainer          = obj.startContainer
-    @startOffset             = obj.startOffset
-    @endContainer            = obj.endContainer
-    @endOffset               = obj.endOffset
-
-  setStart: (@startContainer, @startOffset) ->
-    @commonAncestorContainer = commonAncestor(@startContainer, @endContainer)
-
-  setStartBefore: (@startContainer) ->
-    @startOffset = 0
-
-  setStartAfter: (@startContainer) ->
-    @startOffset = @startContainer.length or @startContainer.childNodes.length
-
-  setEnd: (@endContainer, @endOffset) ->
-    @commonAncestorContainer = commonAncestor(@startContainer, @endContainer)
-
-  setEndBefore: (@endContainer) ->
-    @endOffset = 0
-
-  setEndAfter: (@endContainer) ->
-    @endOffset = @endContainer.length or @endContainer.childNodes.length
-
-  # Public: Normalize the start and end to TextNode boundaries.
-  #
-  # Returns an instance of NormalizedRange
-  normalize: (root) ->
-    splitBoundaries(this)
-    normalizeBoundaries(this)
-    return new NormalizedRange({
-      commonAncestor: @commonAncestorContainer
-      start: @startContainer,
-      end: @endContainer
-    })
-
-  # Public: Creates a range suitable for storage.
-  #
-  # root           - A root Element from which to anchor the serialisation.
-  # ignoreSelector - A selector String of elements to ignore. For example
-  #                  elements injected by the annotator.
-  #
-  # Returns an instance of SerializedRange.
-  serialize: (root, ignoreSelector) ->
-    this.normalize()
-    return serialize(this, root, ignoreSelector)
-
 # Public: A normalised range is most commonly used throughout the annotator.
-# its the result of a deserialised SerializedRange or a BrowserRange with
+# its the result of a deserialised SerializedRange or a browser Range with
 # out browser inconsistencies.
 class NormalizedRange
 
@@ -332,7 +271,13 @@ class SerializedRange
   # Returns a NormalizedRange instance.
   normalize: (root) ->
     range = deserialize(root, @start, @startOffset, @end, @endOffset)
-    return new BrowserRange(range).normalize(root)
+    splitBoundaries(range)
+    normalizeBoundaries(range)
+    return new NormalizedRange({
+      commonAncestor: range.commonAncestorContainer,
+      start: range.startContainer,
+      end: range.endContainer
+    })
 
   # Public: Creates a range suitable for storage.
   #
@@ -347,7 +292,6 @@ class SerializedRange
 
 # Export the above interface.
 module.exports = {
-  BrowserRange
   NormalizedRange
   SerializedRange
   normalizeBoundaries
