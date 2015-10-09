@@ -11,6 +11,21 @@ TEXT_NODE = 3
 
 # Public interface.
 
+limit = (range, bounds) ->
+  {startContainer, startOffset, endContainer, endOffset} = range
+
+  if not contains(bounds, startContainer)
+    startContainer = bounds
+    startOffset = 0
+
+  if not contains(bounds, endContainer)
+    endContainer = bounds
+    endOffset = bounds.length or bounds.childNodes.length
+
+  range.setStart(startContainer, startOffset)
+  range.setEnd(endContainer, endOffset)
+
+
 normalizeBoundaries = (range) ->
   {startContainer, startOffset, endContainer, endOffset} = range
 
@@ -182,35 +197,19 @@ class NormalizedRange
   #
   # Returns updated self or null.
   limit: (bounds) ->
-    if @commonAncestor == bounds or contains(bounds, @commonAncestor)
+    range = document.createRange()
+    range.setStart(@start, 0)
+    range.setEnd(@end, @end.length)
+    limit(range, bounds)
+
+    try
+      normalizeBoundaries(range)
+      @commonAncestor = range.commonAncestorContainer
+      @start = range.startContainer
+      @end = range.endContainer
       return this
-
-    if not contains(@commonAncestor, bounds)
+    catch
       return null
-
-    document = bounds.ownerDocument
-
-    if not contains(bounds, @start)
-      node = bounds
-      next = (node) -> node isnt last and documentForward(node) or null
-      last = lastLeaf(bounds)
-      node = next(node) while not isTextNode(node)
-      @start = node
-
-    if not contains(bounds, @end)
-      node = bounds
-      next = (node) -> node isnt last and documentReverse(node) or null
-      last = firstLeaf(bounds)
-      node = next(node) while not isTextNode(node)
-      @end = node
-
-    return null unless @start and @end
-
-    @commonAncestor = @start
-    while not contains(@commonAncestor, @end)
-      @commonAncestor = @commonAncestor.parentNode
-
-    this
 
   # Convert this range into an object consisting of two pairs of (xpath,
   # character offset), which can be easily stored in a database.
