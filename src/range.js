@@ -119,11 +119,13 @@ export function deserialize(root, startPath, startOffset, endPath, endOffset) {
     // Unfortunately, we *can't* guarantee only one TextNode per Element, so
     // process each TextNode until their combined length exceeds or matches the
     // value of the offset.
-    for (let tn of filterNode(node, isTextNode)) {
-      if ((isEnd && tn.length == offset) || (offset < tn.length)) {
-        return {container: tn, offset: offset}
+    let last = lastLeaf(node)
+    let next = (node) => node === last ? null : documentForward(node)
+    while ((node = next(node)) && (node = findNode(node, isTextNode, next))) {
+      if ((isEnd && node.length == offset) || (offset < node.length)) {
+        return {container: node, offset: offset}
       } else {
-        offset -= tn.length
+        offset -= node.length
       }
     }
 
@@ -153,15 +155,13 @@ export function serialize(range, root, ignoreSelector) {
     }
 
     let path = xpath.fromNode(origParent, root)
-    let textNodes = filterNode(origParent, isTextNode)
+    let first = firstLeaf(origParent)
+    let prev = (node) => node === first ? null : documentReverse(node)
 
     // Calculate real offset as the combined length of all the
     // preceding TextNode siblings, plus the node itself if it is the end.
-    let index = textNodes.indexOf(node)
-    if (isEnd) index++
-
-    let offset = 0
-    for (node of textNodes.slice(0, index)) {
+    let offset = isEnd ? node.length: 0
+    while ((node = prev(node)) && (node = findNode(node, isTextNode, prev))) {
       offset += node.length
     }
 
@@ -192,36 +192,6 @@ function findNode(node, fn, next=documentForward) {
   let result = false;
   while (node && !(result = fn(node))) node = next(node)
   return result ? node : undefined
-}
-
-
-/* Return an Array of each Node in the tree for which the predicate is true.
- * An optional third argument specifies a traversal and should be a function
- * that returns the successor of its argument. The default is document order.
- */
-function filterNode(node, fn, next=documentForward) {
-  let collect = ((acc, n) => fn(n) ? acc.concat([n]) : acc)
-  return reduceNode(node, collect, [], next)
-}
-
-
-function reduceNode(node, fn, initialValue=undefined, next=documentForward) {
-  let acc = initialValue
-  let last = lastLeaf(node)
-  if (arguments.length === 2) {
-    if (node === last) return node
-    acc = node
-    node = next(node)
-  } else {
-    acc = fn(acc, node)
-  }
-
-  while ((node = next(node))) {
-    acc = fn(acc, node)
-    if (node === last) break
-  }
-
-  return acc
 }
 
 
