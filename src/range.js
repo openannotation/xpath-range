@@ -32,7 +32,6 @@ export function limit(range, bounds) {
 
 export function normalizeBoundaries(range) {
   let {startContainer, startOffset, endContainer, endOffset} = range
-  let node, next, last, start, end
 
   // Move the start container to the last leaf before any sibling boundary,
   // guaranteeing that any children of the container are within the range.
@@ -56,24 +55,19 @@ export function normalizeBoundaries(range) {
     return true
   }
 
-  // Find the start TextNode.
-  // The guarantees above provide that a document order traversal visits every
-  // Node in the Range before visiting the last leaf of the end container.
-  node = startContainer
-  next = (node) => (node === last) ? null : documentForward(node)
-  last = lastLeaf(endContainer)
-  while (node && !isTextNodeInRange(node)) node = next(node)
-  start = node
+  function findTextNode(from, to, next) {
+    let node = from;
+    while (node && !isTextNodeInRange(node)) node = next(node)
+    return node
+  }
 
-  // Find the end TextNode.
-  // Similarly, a reverse document order traversal visits every Node in the
-  // Range before visiting the first leaf of the start container.
-  node = endContainer
-  next = (node) => (node === last) ? null : documentReverse(node)
-  last = firstLeaf(startContainer)
-  while (node && !isTextNodeInRange(node)) node = next(node)
-  end = node
+  // Find the start and end TextNode.
+  let first = firstLeaf(startContainer)
+  let last = lastLeaf(endContainer)
+  let start = findTextNode(first, last, documentForward)
+  let end = findTextNode(last, first, documentReverse)
 
+  // Update the Range.
   range.setStart(start, 0)
   range.setEnd(end, end.length)
 }
