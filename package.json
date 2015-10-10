@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "eslint src && karma start --single-run",
-    "prepublish": "browserify -s xpath-range -t [babelify --loose all --optional runtime] src/index.js > index.js"
+    "prepublish": "browserify -s xpath-range -t [babelify --loose all] src/index.js > index.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,6 @@
   "homepage": "https://github.com/openannotation/xpath-range",
   "dependencies": {
     "ancestors": "0.0.3",
-    "babel-runtime": "^5.8.25",
     "insert-after": "^0.1.1",
     "matches-selector": "^1.0.0",
     "node-contains": "^1.0.0"

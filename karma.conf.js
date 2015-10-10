@@ -70,7 +70,7 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       transform: [
-        ['babelify', {loose: 'all', optional: 'runtime'}]
+        ['babelify', {loose: 'all'}]
       ]
     }
   })

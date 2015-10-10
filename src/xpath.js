@@ -107,7 +107,8 @@ function nodePosition(node) {
 
 // Find the child of the given node by name and ordinal position.
 function findChild(node, name, position) {
-  for (node of node.childNodes) {
+  node = node.firstChild
+  for (node = node.firstChild ; node ; node = node.nextSibling) {
     if (nodeName(node) === name && --position === 0) return node
   }
   return null
