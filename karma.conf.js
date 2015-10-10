@@ -70,7 +70,10 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       extensions: ['.coffee'],
-      transform: ['coffeeify']
+      transform: [
+        'coffeeify',
+        ['babelify', {loose: 'all', optional: 'runtime'}]
+      ]
     }
   })
 }
