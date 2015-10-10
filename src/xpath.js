@@ -58,7 +58,7 @@ export function toNode(path, root = document, resolver) {
     }
 
     // Add a default prefix to each path part.
-    path = path.replace(/\/(?!\.)([^\/:]+)(?=\/|$)/g, '/_default_:$1')
+    path = path.replace(/\/(?!\.)([^\/:\(]+)(?=\/|$)/g, '/_default_:$1')
   }
 
   try {
