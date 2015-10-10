@@ -16,7 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'spec/fixtures/*.html',
-      'spec/*.coffee'
+      'spec/*.js'
     ],
 
 
@@ -28,7 +28,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.coffee': ['browserify'],
+      '**/*.js': ['browserify'],
       '**/*.html': ['html2js']
     },
 
@@ -69,9 +69,7 @@ module.exports = function(config) {
     // Browserify configuration
     browserify: {
       debug: true,
-      extensions: ['.coffee'],
       transform: [
-        'coffeeify',
         ['babelify', {loose: 'all', optional: 'runtime'}]
       ]
     }
