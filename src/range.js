@@ -189,6 +189,7 @@ export function serialize(range, root, ignoreSelector) {
  * that returns the successor of its argument. The default is document order.
  */
 function findNode(node, fn, next=documentForward) {
+  let result = false;
   while (node && !(result = fn(node))) node = next(node)
   return result ? node : undefined
 }
@@ -210,12 +211,12 @@ function reduceNode(node, fn, initialValue=undefined, next=documentForward) {
   if (arguments.length === 2) {
     if (node === last) return node
     acc = node
-    node = documentForward(node)
+    node = next(node)
   } else {
     acc = fn(acc, node)
   }
 
-  while (node = documentForward(node)) {
+  while ((node = next(node))) {
     acc = fn(acc, node)
     if (node === last) break
   }

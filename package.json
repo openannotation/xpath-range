@@ -2,10 +2,10 @@
   "name": "xpath-range",
   "version": "0.0.6",
   "description": "A (Browser) Range implementation / wrapper with XPath features, extracted from Annotator",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
-    "test": "coffeelint src && karma start --single-run",
-    "prepublish": "coffee -o lib src/"
+    "test": "eslint src && karma start --single-run",
+    "prepublish": "browserify -s xpath-range -t [babelify --loose all --optional runtime] src/index.js > index.js"
   },
   "repository": {
     "type": "git",
@@ -25,9 +25,11 @@
     "node-contains": "^1.0.0"
   },
   "devDependencies": {
+    "babel-eslint": "^4.1.3",
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
     "chai": "^3.3.0",
+    "eslint": "^1.6.0",
     "karma": "^0.13.10",
     "karma-browserify": "^4.4.0",
     "karma-chai": "^0.1.0",
@@ -37,5 +39,15 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "mocha": "^2.3.3",
     "phantomjs": "^1.9.18"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true
+    },
+    "extends": "eslint:recommended",
+    "parser": "babel-eslint",
+    "rules": {
+      "comma-dangle": 0
+    }
   }
 }

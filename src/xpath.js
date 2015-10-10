@@ -53,7 +53,7 @@ export function toNode(path, root = document, resolver) {
     let documentElement = (root.ownerDocument || root).documentElement
     let defaultNS = documentElement.lookupNamespaceURI(null) || HTML_NAMESPACE
     resolver = (prefix) => {
-      ns = {'_default_': defaultNS}
+      let ns = {'_default_': defaultNS}
       return ns[prefix] || documentElement.lookupNamespaceURI(prefix)
     }
 
@@ -62,7 +62,7 @@ export function toNode(path, root = document, resolver) {
   }
 
   try {
-    r = document.evaluate(path, root, resolver, FIRST_ORDERED_NODE_TYPE, null)
+    let r = document.evaluate(path, root, resolver, FIRST_ORDERED_NODE_TYPE, null)
     return r.singleNodeValue
   } catch (e) {
     // Fallback approach in case of no document.evaluate() or another error.
@@ -98,7 +98,7 @@ function nodeName(node) {
 function nodePosition(node) {
   let name = node.nodeName
   let position = 1
-  while (node = node.previousSibling) {
+  while ((node = node.previousSibling)) {
     if (node.nodeName === name) position += 1
   }
   return position
