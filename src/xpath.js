@@ -1,3 +1,5 @@
+import getDocument from 'get-document'
+
 import DOMException from './dom-exception'
 
 // https://developer.mozilla.org/en-US/docs/XPathResult
@@ -50,7 +52,7 @@ export function toNode(path, root = document, resolver) {
 
   // Make a default resolver.
   if (resolver === undefined && document.lookupNamespaceURI) {
-    let documentElement = (root.ownerDocument || root).documentElement
+    let documentElement = getDocument(root).documentElement
     let defaultNS = documentElement.lookupNamespaceURI(null) || HTML_NAMESPACE
     resolver = (prefix) => {
       let ns = {'_default_': defaultNS}

@@ -1,5 +1,6 @@
 import ancestors from 'ancestors'
 import contains from 'dom-contains'
+import getDocument from 'get-document'
 import matches from 'matches-selector'
 
 import DOMException from './dom-exception'
@@ -120,7 +121,7 @@ export function split(range) {
 
 
 export function deserialize(root, startPath, startOffset, endPath, endOffset) {
-  let document = root.ownerDocument
+  let document = getDocument(root)
   let range = document.createRange()
 
   function findBoundary(path, offset, isEnd) {
