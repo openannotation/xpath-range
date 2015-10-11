@@ -1,4 +1,6 @@
 import {assert} from 'assertive-chai'
+import rangy from 'rangy'
+rangy.shim()
 
 import {normalizeBoundaries, splitBoundaries} from '../../src/range'
 import {limit, serialize, deserialize} from '../../src/range'
