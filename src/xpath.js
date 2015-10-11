@@ -49,7 +49,7 @@ export function toNode(path, root = document, resolver) {
   }
 
   // Make a default resolver.
-  if (resolver === undefined) {
+  if (resolver === undefined && document.lookupNamespaceURI) {
     let documentElement = (root.ownerDocument || root).documentElement
     let defaultNS = documentElement.lookupNamespaceURI(null) || HTML_NAMESPACE
     resolver = (prefix) => {
