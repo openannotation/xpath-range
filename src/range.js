@@ -13,85 +13,105 @@ const TEXT_NODE = 3
 // Public interface.
 
 export function limit(range, bounds) {
-  let {startContainer, startOffset, endContainer, endOffset} = range
+  let sc = range.startContainer
+  let so = range.startOffset
+  let ec = range.endContainer
+  let eo = range.endOffset
 
-  if (!contains(bounds, startContainer)) {
-    startContainer = bounds
-    startOffset = 0
+  if (!contains(bounds, sc)) {
+    sc = bounds
+    so = 0
   }
 
-  if (!contains(bounds, endContainer)) {
-    endContainer = bounds
-    endOffset = bounds.length || bounds.childNodes.length
+  if (!contains(bounds, ec)) {
+    ec = bounds
+    eo = bounds.length || bounds.childNodes.length
   }
 
-  range.setStart(startContainer, startOffset)
-  range.setEnd(endContainer, endOffset)
+  range.setStart(sc, so)
+  range.setEnd(ec, eo)
 }
 
 
 export function normalizeBoundaries(range) {
-  let {startContainer, startOffset, endContainer, endOffset} = range
+  let sc = range.startContainer
+  let so = range.startOffset
+  let ec = range.endContainer
+  let eo = range.endOffset
 
-  // Move the start container to the last leaf before any sibling boundary,
-  // guaranteeing that any children of the container are within the range.
-  if (startContainer.childNodes.length && startOffset > 0) {
-    startContainer = lastLeaf(startContainer.childNodes[startOffset-1])
-    startOffset = startContainer.length || startContainer.childNodes.length
+  // Move the start container to the last leaf before any sibling boundary.
+  if (sc.childNodes.length && so > 0) {
+    sc = lastLeaf(sc.childNodes[so-1])
+    so = sc.length || 0
   }
 
-  // Move the end container to the first leaf after any sibling boundary,
-  // guaranteeing that any children of the container are within the range.
-  if (endOffset < endContainer.childNodes.length) {
-    endContainer = firstLeaf(endContainer.childNodes[endOffset])
-    endOffset = 0
+  // Move the end container to the first leaf after any sibling boundary.
+  if (eo < ec.childNodes.length) {
+    ec = firstLeaf(ec.childNodes[eo])
+    eo = 0
   }
 
-  // Any TextNode in the traversal is valid unless excluded by the offset.
-  function isTextNodeInRange(node) {
-    if (!isTextNode(node)) return false
-    if (node === startContainer && startOffset > 0) return false
-    if (node === endContainer && endOffset == 0) return false
+  // Move each container inward until it reaches a leaf Node.
+  let start = firstLeaf(sc)
+  let end = lastLeaf(ec)
+
+  // Define a predicate to check if a Node is a leaf Node inside the Range.
+  function isLeafNodeInRange (node) {
+    if (node.childNodes.length) return false
+    let length = node.length || 0
+    if (node === sc && so === length) return false
+    if (node === ec && eo === 0) return false
     return true
   }
 
-  function findTextNode(from, to, next) {
-    let node = from
-    while (node && !isTextNodeInRange(node) && node !== to) node = next(node)
-    return node;
+  // Move the start container until it is included or collapses to the end.
+  let next = (node) => node === end ? null : documentForward(node)
+  while (!isLeafNodeInRange(start)) start = next(start)
+
+  if (start === sc) {
+    range.setStart(sc, so)
+  } else if (start.nodeType === 3) {
+    range.setStart(start, 0)
+  } else {
+    range.setStartBefore(start)
   }
 
-  // Find the start and end TextNode.
-  let first = firstLeaf(startContainer)
-  let last = lastLeaf(endContainer)
-  let start = findTextNode(first, last, documentForward)
-  let end = findTextNode(last, first, documentReverse)
+  // Move the end container until it is included or collapses to the start.
+  let prev = (node) => node === start ? null : documentReverse(node)
+  while (end && !isLeafNodeInRange(end)) end = prev(end)
 
-  // Update the Range.
-  range.setStart(start, 0)
-  range.setEnd(end, end.length)
+  if (end === ec) {
+    range.setEnd(ec, eo)
+  } else if (start.nodeType === 3) {
+    range.setEnd(end, end.length)
+  } else {
+    range.setEndAfter(end)
+  }
 }
 
 
 export function splitBoundaries(range) {
-  let {startContainer, startOffset, endContainer, endOffset} = range
+  let sc = range.startContainer
+  let so = range.startOffset
+  let ec = range.endContainer
+  let eo = range.endOffset
 
-  if (isTextNode(endContainer)) {
-    if (0 < endOffset && endOffset < endContainer.length) {
-      endContainer = splitText(endContainer, endOffset)
-      range.setEnd(endContainer, 0)
+  if (isTextNode(ec)) {
+    if (0 < eo && eo < ec.length) {
+      ec = splitText(ec, eo)
+      range.setEnd(ec, 0)
     }
   }
 
-  if (isTextNode(startContainer)) {
-    if (0 < startOffset && startOffset < startContainer.length) {
-      if (startContainer === endContainer) {
-        startContainer = splitText(startContainer, startOffset)
-        range.setEnd(startContainer, endOffset - startOffset)
+  if (isTextNode(sc)) {
+    if (0 < so && so < sc.length) {
+      if (sc === ec) {
+        sc = splitText(sc, so)
+        range.setEnd(sc, eo - so)
       } else {
-        startContainer = splitText(startContainer, startOffset)
+        sc = splitText(sc, so)
       }
-      range.setStart(startContainer, 0)
+      range.setStart(sc, 0)
     }
   }
 }
@@ -115,11 +135,13 @@ export function deserialize(root, startPath, startOffset, endPath, endOffset) {
     // value of the offset.
     let last = lastLeaf(node)
     let next = (node) => node === last ? null : documentForward(node)
-    while ((node = next(node)) && (node = findNode(node, isTextNode, next))) {
-      if ((isEnd && node.length == offset) || (offset < node.length)) {
-        return {container: node, offset: offset}
-      } else {
-        offset -= node.length
+    while ((node = next(node))) {
+      if (isTextNode(node)) {
+        if ((isEnd && node.length == offset) || (offset < node.length)) {
+          return {container: node, offset: offset}
+        } else {
+          offset -= node.length
+        }
       }
     }
 
@@ -150,13 +172,13 @@ export function serialize(range, root, ignoreSelector) {
 
     let path = xpath.fromNode(origParent, root)
     let first = firstLeaf(origParent)
-    let prev = (node) => node === first ? null : documentReverse(node)
+    let next = (node) => node === first ? null : documentReverse(node)
 
     // Calculate real offset as the combined length of all the
     // preceding TextNode siblings, plus the node itself if it is the end.
     let offset = isEnd ? node.length: 0
-    while ((node = prev(node)) && (node = findNode(node, isTextNode, prev))) {
-      offset += node.length
+    while ((node = next(node))) {
+      if (isTextNode(node)) offset += node.length
     }
 
     return [path, offset]
@@ -177,17 +199,6 @@ export function serialize(range, root, ignoreSelector) {
 
 
 // Private helpers.
-
-/* Return the first Node in the tree that matches the predicate.
- * An optional third argument specifies a traversal and should be a function
- * that returns the successor of its argument. The default is document order.
- */
-function findNode(node, fn, next=documentForward) {
-  let result = false;
-  while (node && !(result = fn(node))) node = next(node)
-  return result ? node : undefined
-}
-
 
 /* Split a TextNode at an offset, returning the successor.
  * https://github.com/Raynos/DOM-shim/issues/11
