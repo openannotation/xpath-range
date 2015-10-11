@@ -119,11 +119,21 @@ module.exports = function(config) {
     }
   })
 
-  if (process.env.TRAVIS) {
+  try {
+    var sauceCredentials = require('./sauce.json');
+    process.env.SAUCE_USERNAME = sauceCredentials.username;
+    process.env.SAUCE_ACCESS_KEY = sauceCredentials.accessKey;
+  } catch (e) {
+    console.log('Note: run `git-crypt unlock` to use Sauce Labs credentials.');
+  }
+
+  if (process.env.SAUCE_USERNAME) {
     config.sauceLabs = {
       testName: 'XPath Range test',
     };
-    config.captureTimeout = 120000;
+  }
+
+  if (process.env.TRAVIS) {
     config.browsers = [process.env.BROWSER];
     config.reporters = ['dots', 'saucelabs'];
     config.singleRun = true;
