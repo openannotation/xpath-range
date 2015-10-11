@@ -99,7 +99,7 @@ export function splitBoundaries(range) {
   if (isTextNode(ec)) {
     if (0 < eo && eo < ec.length) {
       ec = splitText(ec, eo)
-      range.setEnd(ec, 0)
+      eo = 0;
     }
   }
 
@@ -107,13 +107,16 @@ export function splitBoundaries(range) {
     if (0 < so && so < sc.length) {
       if (sc === ec) {
         sc = splitText(sc, so)
-        range.setEnd(sc, eo - so)
+        eo = eo - so
       } else {
         sc = splitText(sc, so)
       }
-      range.setStart(sc, 0)
+      so = 0
     }
   }
+
+  range.setStart(sc, so)
+  range.setEnd(ec, eo)
 }
 
 
