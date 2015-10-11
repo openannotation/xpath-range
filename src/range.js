@@ -56,9 +56,9 @@ export function normalizeBoundaries(range) {
   }
 
   function findTextNode(from, to, next) {
-    let node = from;
-    while (node && !isTextNodeInRange(node)) node = next(node)
-    return node
+    let node = from
+    while (node && !isTextNodeInRange(node) && node !== to) node = next(node)
+    return node;
   }
 
   // Find the start and end TextNode.
