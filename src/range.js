@@ -82,7 +82,7 @@ export function normalizeBoundaries(range) {
 
   if (end === ec) {
     range.setEnd(ec, eo)
-  } else if (start.nodeType === 3) {
+  } else if (end.nodeType === 3) {
     range.setEnd(end, end.length)
   } else {
     range.setEndAfter(end)
