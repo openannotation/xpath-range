@@ -10,7 +10,16 @@ Use `npm install xpath-range`.
 
 ## Usage
 
-    TODO: The API is not finalized.
+  TODO: The API is not finalized.
+
+## Compatibility
+
+This library should work with any browser implementing basic `Range` support.
+
+### Internet Explorer version 8
+
+- Basic support can be achieved with the [rangy][rangy] shim.
+- There is no support for namespaces in X(HT)ML documents (issue #17).
 
 ## Community
 
@@ -35,3 +44,5 @@ To run the test suite in a browser, install the karma test runner
     npm install -g karma-cli
 
 and then run `karma start` and it will print directions for debugging.
+
+[rangy] https://github.com/timdown/rangy
