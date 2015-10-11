@@ -1,3 +1,5 @@
+import {assert} from 'assertive-chai'
+
 import {normalizeBoundaries, splitBoundaries} from '../../src/range'
 import {limit, serialize, deserialize} from '../../src/range'
 import * as xpath from '../../src/xpath'
@@ -72,12 +74,12 @@ describe("deserialize", () => {
   it("should raise NotFoundError if a node cannot be found", () => {
     let root = document.createElement('div')
     let check = () => deserialize(root, '/p/strong', 13, '/p/strong', 27)
-    assert.throw(check, 'NotFoundError')
+    assert.throws(check, 'NotFoundError')
   })
 
   it("should raise IndexSizeError if an offset is too large", () => {
     let check = () => deserialize(fixture.el, '/p/strong', 13, '/p/strong', 100)
-    assert.throw(check, 'IndexSizeError')
+    assert.throws(check, 'IndexSizeError')
   })
 })
 
