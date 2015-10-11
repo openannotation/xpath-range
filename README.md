@@ -1,7 +1,5 @@
 # xpath-range
 
-[![Build Status](https://travis-ci.org/openannotation/xpath-range.svg?branch=master)](https://travis-ci.org/openannotation/xpath-range)
-
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/xpath-range.svg)](https://saucelabs.com/u/xpath-range)
 
 This module is for describing and resolving a DOM `Range` using XPath.
