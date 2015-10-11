@@ -1,6 +1,8 @@
 import {assert} from 'assertive-chai'
+
+import ie8 from 'is-ie8'
 import rangy from 'rangy'
-rangy.shim()
+if (ie8) rangy.shim()
 
 import {normalizeBoundaries, splitBoundaries} from '../../src/range'
 import {limit, serialize, deserialize} from '../../src/range'
