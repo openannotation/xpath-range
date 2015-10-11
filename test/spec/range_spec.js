@@ -25,7 +25,7 @@ const testData = [
   ['/p/strong/text()', 22,  '/p/text()',        12, "morbi tristique senectus et",                        "Spanning 2 nodes."],
   ['/p/strong',        0,   '/p/text()',        12, "Pellentesque habitant morbi tristique senectus et",  "Spanning 2 nodes, elementNode start ref."],
   ['/p/text()',        165, '/p/em',            1,  "egestas semper. Aenean ultricies mi vitae est.",     "Spanning 2 nodes, elementNode end ref."],
-  ['/h2/text()',       7,   '/ol/li/text()',    11, "Level 2\n  Lorem ipsum",                             "Spanning multiple nodes, textNode refs."],
+  ['/h2/text()',       7,   '/ol/li/text()',    11, "Level 2Lorem ipsum",                                 "Spanning multiple nodes, textNode refs."],
   ['/p',        0,   '/p',        8,   "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis.", "Spanning multiple nodes, elementNode refs."],
   ['/p[2]',     0,   '/p[2]',     1,   "Lorem sed do eiusmod tempor.",                      "Full node contents with empty node at end."],
   ["/div/text()[2]",0,"/div/text()[2]",28,"Lorem sed do eiusmod tempor.",                   "Text between br tags, textNode refs"],
@@ -44,7 +44,7 @@ const testData = [
   ["/div[2]",   3,"/div[2]/text()[2]",28,"Lorem sed do eiusmod tempor.",                    "Text between br tags, elementNode ref at start"],
   ["/div[2]",   2,"/div[2]/text()[2]",28,"Lorem sed do eiusmod tempor.",                    "Text between br tags, with <p><br/></p> at the start"],
   ["/div[2]",   1,"/div[2]/text()[2]",28,"Lorem sed do eiusmod tempor.",                    "Text between br tags, with <br/><p><br/></p> at the start"],
-  ["/h2[2]",    0,"/p[4]", 0, "Header Level 2\n  Mauris lacinia ipsum nulla, id iaculis quam egestas quis.", "No text node at the end and offset 0"],
+  ["/h2[2]",    0,"/p[4]", 0, "Header Level 2Mauris lacinia ipsum nulla, id iaculis quam egestas quis.", "No text node at the end and offset 0"],
   ["/p[1]/strong[1]",       1,  "/p[1]/text()[1]", 9, " senectus",                          "Text with start at sibling boundary."],
   ["/p[1]/em[1]/text()[1]", 20, "/p[1]",           3, "vitae est.",                         "Text with end at sibling boundary."],
 ]
@@ -113,7 +113,9 @@ describe("normalizing a Range", () => {
       let range = createRange(i)
       splitBoundaries(range)
       normalizeBoundaries(range)
-      assert.equal(range.toString(), testData[i][4], testData[i][5])
+      // Actual is normalized to remove newlines because IE < 9 does this.
+      let actual = range.toString().replace('\n', '')
+      assert.equal(actual, testData[i][4], testData[i][5])
     }
   }
 
