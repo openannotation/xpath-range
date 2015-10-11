@@ -1,6 +1,5 @@
 import ancestors from 'ancestors'
-import contains from 'node-contains'
-import insertAfter from 'insert-after'
+import contains from 'dom-contains'
 import matches from 'matches-selector'
 
 import DOMException from './dom-exception'
@@ -202,6 +201,14 @@ export function serialize(range, root, ignoreSelector) {
 
 
 // Private helpers.
+
+/* Insert a Node as the next sibling of a reference Node. */
+function insertAfter(node, referenceNode) {
+  let parent = referenceNode.parentNode
+  let next = referenceNode.nextSibling
+  return next ? parent.insertBefore(node, next) : parent.appendChild(node)
+}
+
 
 /* Split a TextNode at an offset, returning the successor.
  * https://github.com/Raynos/DOM-shim/issues/11
