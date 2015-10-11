@@ -32,7 +32,7 @@ export function limit(range, bounds) {
 }
 
 
-export function normalizeBoundaries(range) {
+export function normalize(range) {
   let sc = range.startContainer
   let so = range.startOffset
   let ec = range.endContainer
