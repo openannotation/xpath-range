@@ -128,6 +128,7 @@ module.exports = function(config) {
   }
 
   if (process.env.SAUCE_USERNAME) {
+    config.browserNoActivityTimeout = 30 * 1000;
     config.sauceLabs = {
       testName: 'XPath Range test',
     };
