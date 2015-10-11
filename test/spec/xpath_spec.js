@@ -1,3 +1,7 @@
+import {assert} from 'assertive-chai'
+import * as wgxpath from 'wgxpath'
+wgxpath.install()
+
 import * as xpath from '../../src/xpath'
 
 describe('xpath', () => {
@@ -33,7 +37,7 @@ describe('xpath', () => {
     it('raises InvalidNodeTypeError if root does not contain node ', () => {
       let node = document.createElement('div')
       let check = () => xpath.fromNode(node, fixture.el)
-      assert.throw(check, 'InvalidNodeTypeError')
+      assert.throws(check, 'InvalidNodeTypeError')
     })
   })
 
