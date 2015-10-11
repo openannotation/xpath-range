@@ -4,7 +4,7 @@ import ie8 from 'is-ie8'
 import rangy from 'rangy'
 if (ie8) rangy.shim()
 
-import {normalize, splitBoundaries} from '../../src/range'
+import {normalize, split} from '../../src/range'
 import {limit, serialize, deserialize} from '../../src/range'
 import * as xpath from '../../src/xpath'
 
@@ -96,7 +96,7 @@ describe("serialize", () => {
     let range = document.createRange()
     range.setStart(text, 13)
     range.setEnd(text, 27)
-    splitBoundaries(range)
+    split(range)
     normalize(range)
     let seri = serialize(range, fixture.el)
     assert.equal(seri.start, "/p[1]/strong[1]")
@@ -113,7 +113,7 @@ describe("normalizing a Range", () => {
   function testNormalization(i) {
     return () => {
       let range = createRange(i)
-      splitBoundaries(range)
+      split(range)
       normalize(range)
       // Actual is normalized to remove newlines because IE < 9 does this.
       let actual = range.toString().replace('\n', '')

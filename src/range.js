@@ -89,7 +89,7 @@ export function normalize(range) {
 }
 
 
-export function splitBoundaries(range) {
+export function split(range) {
   let sc = range.startContainer
   let so = range.startOffset
   let ec = range.endContainer
