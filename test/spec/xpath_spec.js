@@ -1,6 +1,6 @@
 import * as xpath from '../../src/xpath'
 
-describe('xpath', () => {
+let suite = () => {
   beforeEach(() => fixture.load('xpath.html'))
   afterEach(() => fixture.cleanup())
 
@@ -46,4 +46,12 @@ describe('xpath', () => {
       assert.strictEqual(node, strong)
     })
   })
+}
+
+describe('xpath', suite);
+describe('xpath without document.evaluate', () => {
+  let evaluate = document.evaluate
+  before(() => document.evaluate = undefined)
+  after(() => document.evaluate = evaluate)
+  suite()
 })
