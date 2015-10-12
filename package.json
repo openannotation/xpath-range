@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "assertive-chai": "^2.0.2",
+    "babel": "^5.8.23",
     "babel-eslint": "^4.1.3",
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
