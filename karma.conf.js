@@ -14,9 +14,7 @@ module.exports = function(config) {
     reporters: ['progress'],
     browserify: {
       debug: true,
-      transform: [
-        ['babelify', {loose: 'all'}]
-      ]
+      transform: ['babelify']
     },
 
     // Custom browser configurations for Sauce Labs.
