@@ -12,6 +12,7 @@ module.exports = function(config) {
     browsers: ['PhantomJS'],
     frameworks: ['browserify', 'fixture', 'mocha'],
     files: [
+      'adapter.js',
       'spec/fixtures/*.html',
       'spec/*.js'
     ],

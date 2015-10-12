@@ -1,8 +1,3 @@
-import {assert} from 'assertive-chai'
-
-import * as wgxpath from 'wgxpath'
-wgxpath.install()
-
 import * as xpath from '../../src/xpath'
 
 describe('xpath', () => {

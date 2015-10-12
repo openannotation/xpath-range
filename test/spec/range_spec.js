@@ -1,9 +1,3 @@
-import {assert} from 'assertive-chai'
-
-import ie8 from 'is-ie8'
-import rangy from 'rangy'
-if (ie8) rangy.shim()
-
 import {normalize, split, serialize, deserialize} from '../../src/range'
 import * as xpath from '../../src/xpath'
 
