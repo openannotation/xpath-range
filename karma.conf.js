@@ -92,7 +92,11 @@ module.exports = function(config) {
 
   if (process.env.TRAVIS) {
     config.browsers = [process.env.BROWSER];
-    config.reporters = ['dots', 'saucelabs'];
     config.singleRun = true;
+    if (process.env.BROWSER === 'PhantomJS') {
+      config.reporters = ['progress', 'coverage', 'coveralls'];
+    } else {
+      config.reporters = ['progress', 'saucelabs'];
+    }
   }
 }
