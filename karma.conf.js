@@ -1,15 +1,15 @@
-var babelify = require('babelify').configure({loose: 'all'});
-var isparta = require('isparta');
+var babelify = require('babelify').configure({loose: 'all'})
+var isparta = require('isparta')
 var istanbul = require('browserify-istanbul')({
-  ignore: ['**/node_modules/**', '**/test/**'],
   instrumenter: isparta,
   instrumenterConfig: {babel: {loose: 'all'}}
-});
+})
 
 module.exports = function(config) {
   config.set({
     basePath: 'test',
     browsers: ['PhantomJS'],
+    browserify: {debug: true, transform: [babelify]},
     frameworks: ['browserify', 'fixture', 'mocha'],
     files: [
       'adapter.js',
@@ -20,19 +20,9 @@ module.exports = function(config) {
       '**/*.js': ['browserify'],
       '**/*.html': ['html2js']
     },
-    reporters: ['progress', 'coverage', 'coveralls'],
-    coverageReporter: {
-      reporters: [
-        {type: 'lcov', dir: 'coverage'},
-        {type: 'text'}
-      ]
-    },
-    browserify: {
-      debug: true,
-      transform: [istanbul, babelify]
-    },
-
+    reporters: ['progress', 'saucelabs'],
     sauceLabs: {testName: 'XPath Range test'},
+
     customLaunchers: {
       'SL_Chrome': {
         base: 'SauceLabs',
@@ -85,13 +75,18 @@ module.exports = function(config) {
     console.log('Note: run `git-crypt unlock` to use Sauce Labs credentials.');
   }
 
-  if (process.env.TRAVIS) {
-    config.browsers = [process.env.BROWSER];
-    config.singleRun = true;
-    if (process.env.BROWSER === 'PhantomJS') {
-      config.reporters = ['progress', 'coverage', 'coveralls'];
-    } else {
-      config.reporters = ['progress', 'saucelabs'];
-    }
-  }
+  if (process.env.npm_config_coverage) config.set({
+    browserify: {debug: true, transform: [istanbul, babelify]},
+    coverageReporter: {
+      reporters: [
+        {'type': 'lcov', 'dir': '../coverage'},
+        {'type': 'text'}
+      ]
+    },
+    reporters: ['progress', 'saucelabs', 'coverage', 'coveralls']
+  })
+
+  if (process.env.TRAVIS) config.set({
+    browsers: [process.env.BROWSER]
+  })
 }

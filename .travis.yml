@@ -10,7 +10,7 @@ env:
   - secure: LjqDk07qRtDzue/VzlWiRsLss/XSwNcJ9qCXaCwVWFc2UDJfWAVugJuzM2qrtHaxEdIgSgYUfFqgtJnVslBvJ/3nieaoLe4qPjy6h2lH2GE+l7UsdC1IGHWoPj6pkdu5Xgkl+Yv42epdXxThn7L/kFKlZISI7WUJm+6hMpB6KzI=
   - secure: FoDXxc0heIq1WxiReupWbxD5XE3FZj1RK2NZ5W4obiCJN6nGthXOBBzFSflHBqEHFI3to7mtaFC7/8y5Kl++y223RmrRyR/UaA2eXFMWWgGghv6oiZNkayuit14F3TRGjaRulQzp3badH6cDY2F8G79rYeSE6ZOI5g6UeV/bi20=
   matrix:
-  - BROWSER=PhantomJS
+  - BROWSER=PhantomJS npm_config_coverage=true
   - BROWSER=SL_Chrome
   - BROWSER=SL_Firefox
   - BROWSER=SL_Safari
