@@ -4,8 +4,7 @@ import ie8 from 'is-ie8'
 import rangy from 'rangy'
 if (ie8) rangy.shim()
 
-import {normalize, split} from '../../src/range'
-import {limit, serialize, deserialize} from '../../src/range'
+import {normalize, split, serialize, deserialize} from '../../src/range'
 import * as xpath from '../../src/xpath'
 
 function createRange(i) {
@@ -125,97 +124,4 @@ describe("normalizing a Range", () => {
     let test = testNormalization(i)
     it(`should parse test range ${i} (${testData[i][5]})`, test)
   }
-})
-
-describe("limit", () => {
-  let head = null
-  let headText = null
-  let paraText = null
-  let paraText2 = null
-  let paraText3 = null
-  let para2Text = null
-  let para = null
-  let para2 = null
-  let span = null
-  let root = null
-
-  beforeEach(() => {
-    headText  = document.createTextNode("My Heading")
-    paraText  = document.createTextNode("My paragraph")
-    paraText2 = document.createTextNode(" conti")
-    paraText3 = document.createTextNode("nues")
-    para2Text = document.createTextNode("Another paragraph begins")
-
-    head = document.createElement('h1')
-    head.appendChild(headText)
-    para = document.createElement('p')
-    para.appendChild(paraText)
-    span = document.createElement('span')
-    span.appendChild(paraText2)
-    span.appendChild(paraText3)
-    para.appendChild(span)
-    para2 = document.createElement('p')
-    para2.appendChild(para2Text)
-
-    root = document.createElement('div')
-    root.appendChild(head)
-    root.appendChild(para)
-    root.appendChild(para2)
-  })
-
-  it("should be a no-op if all nodes are within the bounding element.", () => {
-    let range = document.createRange()
-    range.setStart(paraText, 0)
-    range.setEnd(paraText2, paraText2.length)
-    limit(range, para)
-    assert.equal(range.commonAncestorContainer, para)
-    assert.equal(range.startContainer, paraText)
-    assert.equal(range.startOffset, 0)
-    assert.equal(range.endContainer, paraText2)
-    assert.equal(range.endOffset, paraText2.length)
-  })
-
-  it("should exclude any nodes to the left of the bounding element.", () => {
-    let range = document.createRange()
-    range.setStart(headText, 0)
-    range.setEnd(paraText2, paraText2.length)
-    limit(range, para)
-    assert.equal(range.commonAncestorContainer, para)
-    assert.equal(range.startContainer, para)
-    assert.equal(range.startOffset, 0)
-    assert.equal(range.endContainer, paraText2)
-    assert.equal(range.endOffset, paraText2.length)
-  })
-
-  it("should exclude any nodes to the right of the bounding element.", () => {
-    let range = document.createRange()
-    range.setStart(paraText, paraText.length)
-    range.setEnd(para2Text, para2Text.length)
-    limit(range, para)
-    assert.equal(range.commonAncestorContainer, para)
-    assert.equal(range.startContainer, paraText)
-    assert.equal(range.startOffset, paraText.length)
-    assert.equal(range.endContainer, para)
-    assert.equal(range.endOffset, para.childNodes.length)
-  })
-
-  it("should exclude any nodes on either side of the bounding element.", () => {
-    let range = document.createRange()
-    range.setStart(headText, 0)
-    range.setEnd(para2Text, para2Text.length)
-    limit(range, para)
-    assert.equal(range.commonAncestorContainer, para)
-    assert.equal(range.startContainer, para)
-    assert.equal(range.startOffset, 0)
-    assert.equal(range.endContainer, para)
-    assert.equal(range.endOffset, para.childNodes.length)
-  })
-
-  it("should return null if no nodes fall within the bounds", () => {
-    let otherDiv = document.createElement('div')
-    let range = document.createRange()
-    range.setStart(headText, 0)
-    range.setEnd(paraText2, paraText2.length)
-    assert.equal(limit(range, otherDiv), null)
-  })
 })
