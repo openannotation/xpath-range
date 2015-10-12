@@ -22,7 +22,7 @@ module.exports = function(config) {
     reporters: ['progress', 'coverage', 'coveralls'],
     coverageReporter: {
       reporters: [
-        {type: 'lcov'},
+        {type: 'lcov', dir: 'coverage'},
         {type: 'text'}
       ]
     },
