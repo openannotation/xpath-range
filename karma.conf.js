@@ -1,4 +1,4 @@
-var babelify = require('babelify');
+var babelify = require('babelify').configure({loose: 'all'});
 var isparta = require('isparta');
 var istanbul = require('browserify-istanbul')({
   ignore: ['**/node_modules/**', '**/test/**'],
