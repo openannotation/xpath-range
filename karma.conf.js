@@ -31,7 +31,7 @@ module.exports = function(config) {
       transform: [istanbul, babelify]
     },
 
-    // Custom browser configurations for Sauce Labs.
+    sauceLabs: {testName: 'XPath Range test'},
     customLaunchers: {
       'SL_Chrome': {
         base: 'SauceLabs',
@@ -82,13 +82,6 @@ module.exports = function(config) {
     process.env.SAUCE_ACCESS_KEY = sauceCredentials.accessKey;
   } catch (e) {
     console.log('Note: run `git-crypt unlock` to use Sauce Labs credentials.');
-  }
-
-  if (process.env.SAUCE_USERNAME) {
-    config.browserNoActivityTimeout = 30 * 1000;
-    config.sauceLabs = {
-      testName: 'XPath Range test',
-    };
   }
 
   if (process.env.TRAVIS) {
