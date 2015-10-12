@@ -2,7 +2,8 @@ var babelify = require('babelify').configure({loose: 'all'});
 var isparta = require('isparta');
 var istanbul = require('browserify-istanbul')({
   ignore: ['**/node_modules/**', '**/test/**'],
-  instrumenter: isparta
+  instrumenter: isparta,
+  instrumenterConfig: {babel: {loose: 'all'}}
 });
 
 module.exports = function(config) {
