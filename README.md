@@ -1,5 +1,4 @@
-# xpath-range
-
+# XPath Range [![Coverage Status](https://coveralls.io/repos/openannotation/xpath-range/badge.svg?branch=master&service=github)](https://coveralls.io/github/openannotation/xpath-range?branch=master)
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/xpath-range.svg)](https://saucelabs.com/u/xpath-range)
 
 This module is for describing and resolving a DOM `Range` using XPath.
