@@ -1,3 +1,10 @@
+var babelify = require('babelify');
+var isparta = require('isparta');
+var istanbul = require('browserify-istanbul')({
+  ignore: ['**/node_modules/**', '**/test/**'],
+  instrumenter: isparta
+});
+
 module.exports = function(config) {
   config.set({
     basePath: 'test',
@@ -11,10 +18,16 @@ module.exports = function(config) {
       '**/*.js': ['browserify'],
       '**/*.html': ['html2js']
     },
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
+    coverageReporter: {
+      reporters: [
+        {type: 'lcov'},
+        {type: 'text'}
+      ]
+    },
     browserify: {
       debug: true,
-      transform: ['babelify']
+      transform: [istanbul, babelify]
     },
 
     // Custom browser configurations for Sauce Labs.
