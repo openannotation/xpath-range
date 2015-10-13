@@ -11,36 +11,6 @@ const TEXT_NODE = 3
 
 // Public interface.
 
-export function split(range) {
-  let sc = range.startContainer
-  let so = range.startOffset
-  let ec = range.endContainer
-  let eo = range.endOffset
-
-  if (isTextNode(ec)) {
-    if (0 < eo && eo < ec.length) {
-      ec = splitText(ec, eo)
-      eo = 0;
-    }
-  }
-
-  if (isTextNode(sc)) {
-    if (0 < so && so < sc.length) {
-      if (sc === ec) {
-        sc = splitText(sc, so)
-        eo = eo - so
-      } else {
-        sc = splitText(sc, so)
-      }
-      so = 0
-    }
-  }
-
-  range.setStart(sc, so)
-  range.setEnd(ec, eo)
-}
-
-
 export function deserialize(root, startPath, startOffset, endPath, endOffset) {
   let document = getDocument(root)
   let range = document.createRange()
@@ -128,25 +98,6 @@ export function serialize(range, root, ignoreSelector) {
 
 
 // Private helpers.
-
-/* Insert a Node as the next sibling of a reference Node. */
-function insertAfter(node, referenceNode) {
-  let parent = referenceNode.parentNode
-  let next = referenceNode.nextSibling
-  return next ? parent.insertBefore(node, next) : parent.appendChild(node)
-}
-
-
-/* Split a TextNode at an offset, returning the successor.
- * https://github.com/Raynos/DOM-shim/issues/11
- */
-function splitText(node, offset) {
-  let tail = node.cloneNode(false)
-  tail.deleteData(0, offset)
-  node.deleteData(offset, node.length - offset)
-  return insertAfter(tail, node)
-}
-
 
 /* Predicate for checking if a node is a TextNode. */
 function isTextNode(node) {
