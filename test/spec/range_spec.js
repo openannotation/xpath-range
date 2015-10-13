@@ -18,11 +18,8 @@ describe("deserialize", () => {
   it("should return a range that starts and ends in a TextNode", () => {
     // Split the targeted text ("Pellentesque...tristique").
     let node = fixture.el.firstChild.firstChild.firstChild
-    while (node.data.length > 1) node = node.splitText(1)
-
     let range = deserialize(fixture.el, '/p/strong', 13, '/p/strong', 27)
-    assert.equal(range.startContainer.data, 'h')
-    assert.equal(range.endContainer.data, 'i')
+    assert.equal(range.toString(), "habitant morbi")
   })
 
   it("should raise NotFoundError if a node cannot be found", () => {

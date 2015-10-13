@@ -15,43 +15,44 @@ export function deserialize(root, startPath, startOffset, endPath, endOffset) {
   let document = getDocument(root)
   let range = document.createRange()
 
-  function findBoundary(path, offset, isEnd) {
-    let node = xpath.toNode(path, root)
-
-    if (!node) {
-      let message = 'Node was not found.'
-      let name = 'NotFoundError'
-      throw new DOMException(message, name)
-    }
-
-    // Unfortunately, we *can't* guarantee only one TextNode per Element, so
-    // process each TextNode until their combined length exceeds or matches the
-    // value of the offset.
-    let last = lastLeaf(node)
-    let next = (node) => node === last ? null : documentForward(node)
-    while ((node = next(node))) {
-      if (isTextNode(node)) {
-        if ((isEnd && node.length == offset) || (offset < node.length)) {
-          return {container: node, offset: offset}
-        } else {
-          offset -= node.length
-        }
-      }
-    }
-
-    // Throw an error because the offset is too large.
-    let message = "There is no text at the requested offset."
-    let name = "IndexSizeError"
-    throw new DOMException(message, name)
-  }
-
-  let start = findBoundary(startPath, startOffset, false)
-  let end = findBoundary(endPath, endOffset, true)
+  let start = findBoundary(startPath, startOffset, 'start')
+  let end = findBoundary(endPath, endOffset, 'end')
 
   range.setStart(start.container, start.offset)
   range.setEnd(end.container, end.offset)
 
   return range
+
+  function findBoundary(path, offset, which) {
+    let container = xpath.toNode(path, root)
+    if (!container) notFound(container)
+
+    let last = lastLeaf(container)
+    let next = (node) => node === last ? null : documentForward(node)
+    while ((container = next(container))) {
+      if (isTextNode(container)) {
+        if ((container.length == offset) || (offset < container.length)) {
+          return {container, offset}
+        } else {
+          offset -= container.length
+        }
+      }
+    }
+
+    throw indexSize(which)
+  }
+
+  function notFound(which) {
+    let message = `The ${which} node was not found.`
+    let name = 'NotFoundError'
+    return new DOMException(message, name)
+  }
+
+  function indexSize(which) {
+    let message = `There is no text at the requested ${which} offset.`
+    let name = "IndexSizeError"
+    return new DOMException(message, name)
+  }
 }
 
 
