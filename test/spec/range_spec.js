@@ -89,8 +89,7 @@ describe("serialize", () => {
     let range = document.createRange()
     range.setStart(text, 13)
     range.setEnd(text, 27)
-    split(range)
-    normalize(range)
+
     let seri = serialize(range, fixture.el)
     assert.equal(seri.start, "/p[1]/strong[1]")
     assert.equal(seri.startOffset, 13)

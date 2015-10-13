@@ -143,38 +143,43 @@ export function deserialize(root, startPath, startOffset, endPath, endOffset) {
 
 
 export function serialize(range, root, ignoreSelector) {
-  function serialization(node, isEnd) {
-    var origParent = node.parentNode
+  let sc = range.startContainer
+  let so = range.startOffset
+  let ec = range.endContainer
+  let eo = range.endOffset
 
-    if (ignoreSelector) {
-      let filterFn = (node) => !matches(node, ignoreSelector)
-      origParent = ancestors(node, filterFn)[0]
-    }
+  let sc0 = null
+  let ec0 = null
+  let start = null
+  let end = null
 
-    let path = xpath.fromNode(origParent, root)
-    let first = firstLeaf(origParent)
-    let next = (node) => node === first ? null : documentReverse(node)
+  let filterFn = (n) => n.nodeType === 1 && !matches(n, ignoreSelector)
 
-    // Calculate real offset as the combined length of all the
-    // preceding TextNode siblings, plus the node itself if it is the end.
-    let offset = isEnd ? node.length: 0
-    while ((node = next(node))) {
-      if (isTextNode(node)) offset += node.length
-    }
-
-    return [path, offset]
+  if ((sc0 = ancestors(sc, filterFn)[0])) {
+    let prefix = document.createRange()
+    prefix.setStart(sc0, 0)
+    prefix.setEnd(sc, 0)
+    so += prefix.toString().length
+    start = xpath.fromNode(sc0, root)
+  } else {
+    start = xpath.fromNode(sc, root)
   }
 
-  let start = serialization(range.startContainer)
-  let end   = serialization(range.endContainer, true)
+  if ((ec0 = ancestors(sc, filterFn)[0])) {
+    let prefix = document.createRange()
+    prefix.setStart(ec0, 0)
+    prefix.setEnd(ec, 0)
+    eo += prefix.toString().length
+    end = xpath.fromNode(ec0, root)
+  } else {
+    end = xpath.fromNode(ec, root)
+  }
 
   return {
-    // XPath strings
-    start: start[0],
-    end: end[0],
-    // Character offsets (integer)
-    startOffset: start[1],
-    endOffset: end[1],
+    start: start,
+    end: end,
+    startOffset: so,
+    endOffset: eo,
   }
 }
 
