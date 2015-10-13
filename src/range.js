@@ -11,63 +11,6 @@ const TEXT_NODE = 3
 
 // Public interface.
 
-export function normalize(range) {
-  let sc = range.startContainer
-  let so = range.startOffset
-  let ec = range.endContainer
-  let eo = range.endOffset
-
-  // Move the start container to the last leaf before any sibling boundary.
-  if (sc.childNodes.length && so > 0) {
-    sc = lastLeaf(sc.childNodes[so-1])
-    so = sc.length || 0
-  }
-
-  // Move the end container to the first leaf after any sibling boundary.
-  if (eo < ec.childNodes.length) {
-    ec = firstLeaf(ec.childNodes[eo])
-    eo = 0
-  }
-
-  // Move each container inward until it reaches a leaf Node.
-  let start = firstLeaf(sc)
-  let end = lastLeaf(ec)
-
-  // Define a predicate to check if a Node is a leaf Node inside the Range.
-  function isLeafNodeInRange (node) {
-    if (node.childNodes.length) return false
-    let length = node.length || 0
-    if (node === sc && so === length) return false
-    if (node === ec && eo === 0) return false
-    return true
-  }
-
-  // Move the start container until it is included or collapses to the end.
-  let next = (node) => node === end ? null : documentForward(node)
-  while (!isLeafNodeInRange(start)) start = next(start)
-
-  if (start === sc) {
-    range.setStart(sc, so)
-  } else if (start.nodeType === 3) {
-    range.setStart(start, 0)
-  } else {
-    range.setStartBefore(start)
-  }
-
-  // Move the end container until it is included or collapses to the start.
-  let prev = (node) => node === start ? null : documentReverse(node)
-  while (end && !isLeafNodeInRange(end)) end = prev(end)
-
-  if (end === ec) {
-    range.setEnd(ec, eo)
-  } else if (end.nodeType === 3) {
-    range.setEnd(end, end.length)
-  } else {
-    range.setEndAfter(end)
-  }
-}
-
-
 export function split(range) {
   let sc = range.startContainer
   let so = range.startOffset
