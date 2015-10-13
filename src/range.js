@@ -121,28 +121,6 @@ function documentForward(node) {
 }
 
 
-/* Return the next Node in a reverse document order traversal.
- * This order is equivalent to pre-order with the child order reversed.
- */
-function documentReverse(node) {
-  if (node.lastChild) return node.lastChild
-
-  while (!node.previousSibling) {
-    node = node.parentNode
-    if (!node) return null
-  }
-
-  return node.previousSibling
-}
-
-
-/* Find the first leaf node. */
-function firstLeaf(node) {
-  while (node.hasChildNodes()) node = node.firstChild
-  return node
-}
-
-
 /* Find the last leaf node. */
 function lastLeaf(node) {
   while (node.hasChildNodes()) node = node.lastChild
