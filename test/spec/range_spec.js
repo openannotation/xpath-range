@@ -6,38 +6,38 @@ describe('toRange', () => {
   afterEach(() => fixture.cleanup())
 
   it('should correctly select a whole TextNode', () => {
-    let range = toRange(fixture.el, '/p/strong', 0, '/p/strong', 37)
+    let range = toRange('/p/strong', 0, '/p/strong', 37, fixture.el)
     assert.equal(range.toString(), 'Pellentesque habitant morbi tristique')
   })
 
   it('should correctly select part of a TextNode', () => {
-    let range = toRange(fixture.el, '/p/strong', 13, '/p/strong', 27)
+    let range = toRange('/p/strong', 13, '/p/strong', 27, fixture.el)
     assert.equal(range.toString(), 'habitant morbi')
   })
 
   it('should correctly select a whole TextNode beneath a child', () => {
-    let range = toRange(fixture.el, '/p', 0, '/p', 37)
+    let range = toRange('/p', 0, '/p', 37, fixture.el)
     assert.equal(range.toString(), 'Pellentesque habitant morbi tristique')
   })
 
   it('should correctly select part of a TextNode beneath a child', () => {
-    let range = toRange(fixture.el, '/p', 13, '/p', 27)
+    let range = toRange('/p', 13, '/p', 27, fixture.el)
     assert.equal(range.toString(), 'habitant morbi')
   })
 
   it('should correctly select text across node boundaries', () => {
-    let range = toRange(fixture.el, '/div[2]/p[1]', 0, '/div[2]/p[2]', 0)
+    let range = toRange('/div[2]/p[1]', 0, '/div[2]/p[2]', 0, fixture.el)
     assert.equal(range.toString(), 'Lorem sed do eiusmod tempor.')
   })
 
   it('should raise NotFoundError if a node cannot be found', () => {
     let root = document.createElement('div')
-    let check = () => toRange(root, '/p/strong', 13, '/p/strong', 27)
+    let check = () => toRange('/p/strong', 13, '/p/strong', 27, root)
     assert.throws(check, 'NotFoundError')
   })
 
   it('should raise IndexSizeError if an offset is too large', () => {
-    let check = () => toRange(fixture.el, '/p/strong', 13, '/p/strong', 100)
+    let check = () => toRange('/p/strong', 13, '/p/strong', 100, fixture.el)
     assert.throws(check, 'IndexSizeError')
   })
 })

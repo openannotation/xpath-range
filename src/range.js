@@ -1,25 +1,25 @@
-import getDocument from 'get-document'
-
 import DOMException from './dom-exception'
 import * as xpath from './xpath'
 
 
 /**
  * Construct a `Range` from the given XPath expressions and offsets.
- * @param {Node} root The root context for the XPath expressions.
+ *
+ * If the optional parameter `root` is supplied, the XPath expressions are
+ * evaluated as relative to it.
+ *
  * @param {string} startPath An XPath expression for the start container.
  * @param {Number} startOffset The textual offset within the start container.
  * @param {string} endPath An XPath expression for the end container.
  * @param {Number} endOffset The textual offset within the end container.
+ * @param {Node} [root] The root context for the XPath expressions.
  * @returns Range
  */
-export function toRange(root, startPath, startOffset, endPath, endOffset) {
-  let document = getDocument(root)
-  let range = document.createRange()
-
+export function toRange(startPath, startOffset, endPath, endOffset, root) {
   let start = findBoundary(startPath, startOffset, 'start')
   let end = findBoundary(endPath, endOffset, 'end')
 
+  let range = document.createRange()
   range.setStart(start.container, start.offset)
   range.setEnd(end.container, end.offset)
 
@@ -37,7 +37,6 @@ export function toRange(root, startPath, startOffset, endPath, endOffset) {
       offset -= length
       container = next(container);
     }
-
     throw indexSize(which)
   }
 
@@ -57,8 +56,12 @@ export function toRange(root, startPath, startOffset, endPath, endOffset) {
 
 /**
  * Convert a `Range` to a pair of XPath expressions and offsets.
+ *
+ * If the optional parameter `root` is supplied, the computed XPath expressions
+ * will be relative to it.
+ *
  * @param {Range} range The Range to convert.
- * @param {Node} root The root context for the XPath expressions.
+ * @param {Node} [root] The root context for the XPath expressions.
  * @returns {{start, startOffset, end, endOffset}}
  */
 export function fromRange(range, root) {

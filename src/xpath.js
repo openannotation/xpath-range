@@ -11,8 +11,12 @@ const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
 /**
  * Compute an XPath expression for the given node.
+ *
+ * If the optional parameter `root` is supplied, the computed XPath expression
+ * will be relative to it.
+ *
  * @param {Node} node The node for which to compute an XPath expression.
- * @param {Node} root The root context for the XPath expression.
+ * @param {Node} [root] The root context for the XPath expression.
  * @returns {string}
  */
 export function fromNode(node, root = document) {
@@ -33,14 +37,23 @@ export function fromNode(node, root = document) {
 /**
  * Find a node using an XPath relative to the given root node.
  *
- * If the document is served as application/xhtml+xml it will try and resolve
+ * If the optional parameter `root` is supplied, the XPath expressions are
+ * evaluated as relative to it.
+ *
+ * If the optional parameter `resolver` is supplied, it will be used to resolve
  * any namespaces within the XPath.
  *
  * @param {string} path An XPath String to evaluate.
- * @param {Node} root The root context for the XPath expression.
+ * @param {Node} [root] The root context for the XPath expression.
  * @returns {Node|null} The first matching Node or null if none is found.
  */
-export function toNode(path, root = document, resolver) {
+export function toNode(path, root = document, resolver = null) {
+  // Check for resolver but no root argument.
+  if (typeof(root) === 'function') {
+    resolver = root;
+    root = document;
+  }
+
   // Make the path relative to the root, if not the document.
   if (root !== document) path = path.replace(/^\//, './')
 
@@ -89,13 +102,13 @@ function resolve(path, root, resolver) {
   try {
     return platformResolve(path, root, resolver);
   } catch (err) {
-    return fallbackResolve(path, root, resolver)
+    return fallbackResolve(path, root)
   }
 }
 
 
 // Find a single node with XPath `path` using the simple, built-in evaluator.
-function fallbackResolve(path, root, resolver) {
+function fallbackResolve(path, root) {
   let steps = path.split("/")
   let node = root
   while (node) {
