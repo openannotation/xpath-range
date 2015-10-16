@@ -5,12 +5,12 @@ describe('toRange', () => {
   beforeEach(() => fixture.load('range.html'))
   afterEach(() => fixture.cleanup())
 
-  it('should return a range with 0 offsets', () => {
-    let range = toRange(fixture.el, '/p/strong', 0, '/p/strong', 27)
-    assert.equal(range.toString(), 'Pellentesque habitant morbi')
+  it('should correctly select a whole TextNode', () => {
+    let range = toRange(fixture.el, '/p/strong', 0, '/p/strong', 37)
+    assert.equal(range.toString(), 'Pellentesque habitant morbi tristique')
   })
 
-  it('should return a range that starts and ends in a TextNode', () => {
+  it('should correctly select part of a TextNode', () => {
     let range = toRange(fixture.el, '/p/strong', 13, '/p/strong', 27)
     assert.equal(range.toString(), 'habitant morbi')
   })
