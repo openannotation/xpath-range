@@ -15,6 +15,16 @@ describe('toRange', () => {
     assert.equal(range.toString(), 'habitant morbi')
   })
 
+  it('should correctly select a whole TextNode beneath a child', () => {
+    let range = toRange(fixture.el, '/p', 0, '/p', 37)
+    assert.equal(range.toString(), 'Pellentesque habitant morbi tristique')
+  })
+
+  it('should correctly select part of a TextNode beneath a child', () => {
+    let range = toRange(fixture.el, '/p', 13, '/p', 27)
+    assert.equal(range.toString(), 'habitant morbi')
+  })
+
   it('should raise NotFoundError if a node cannot be found', () => {
     let root = document.createElement('div')
     let check = () => toRange(root, '/p/strong', 13, '/p/strong', 27)
