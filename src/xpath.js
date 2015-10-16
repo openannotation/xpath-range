@@ -58,7 +58,7 @@ export function toNode(path, root = document, resolver = null) {
   if (root !== document) path = path.replace(/^\//, './')
 
   // Make a default resolver.
-  if (resolver === undefined && document.lookupNamespaceURI) {
+  if (resolver === null && document.lookupNamespaceURI) {
     let documentElement = getDocument(root).documentElement
     let defaultNS = documentElement.lookupNamespaceURI(null) || HTML_NAMESPACE
     resolver = (prefix) => {
