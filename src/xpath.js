@@ -46,9 +46,7 @@ export function fromNode(node, root = document) {
  */
 export function toNode(path, root = document, resolver) {
   // Make the path relative to the root, if not the document.
-  if (root !== document && path[0] === '/' && path[1] !== '/') {
-    path = '.' + path
-  }
+  if (root !== document) path = path.replace(/^\//, './')
 
   // Make a default resolver.
   if (resolver === undefined && document.lookupNamespaceURI) {
