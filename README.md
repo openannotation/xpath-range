@@ -72,10 +72,8 @@ including any necessary test and documentation updates.
 
 You can run the command-line test suite by executing `npm test`.
 
-To run the test suite in a browser, install the karma test runner
-
-    npm install -g karma-cli
-
-and then run `karma start` and it will print directions for debugging.
+To run the test suite, install the karma test runner with the command
+`npm install -g karma-cli` and then run `karma start`. Karma will print
+instructions for debugging the tests in a browser.
 
   [rangy]: https://github.com/timdown/rangy "rangy"
