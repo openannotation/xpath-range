@@ -22,7 +22,7 @@ consume an expression like `/html/body/article/p[3]`.
 
 ### API
 
-#### `XPathRange.fromRange(range, [root])`
+#### `fromRange(range, [root])`
 
 Convert a `Range` to a pair of XPath expressions and offsets.
 
@@ -36,7 +36,7 @@ Returns an object with the following properties:
   - end
   - endOffset
 
-#### `XPathRange.toRange(start, startOffset, end, endOffset, [root])`
+#### `toRange(start, startOffset, end, endOffset, [root])`
 
 Construct a `Range` from the given XPath expressions and offsets.
 
