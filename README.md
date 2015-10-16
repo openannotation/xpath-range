@@ -9,7 +9,28 @@ Use `npm install xpath-range`.
 
 ## Usage
 
-  TODO: The API is not finalized.
+### `XPathRange.fromRange(range, [root])`
+
+Convert a `Range` to a pair of XPath expressions and offsets.
+
+If the optional parameter `root` is supplied, the computed XPath expressions
+will be relative to it.
+
+Returns an object with the following properties:
+
+  - start
+  - startOffset
+  - end
+  - endOffset
+
+### `XPathRange.toRange(root, startPath, startOffset, endPath, endOffset)`
+
+Construct a `Range` from the given XPath expressions and offsets.
+
+If the optional parameter `root` is supplied, the XPath expressions are
+evaluated as relative to it.
+
+Returns a `Range` object.
 
 ## Compatibility
 
@@ -23,7 +44,7 @@ This library should work with any browser implementing basic `Range` support.
 ## Community
 
 Originally, this code was part of the
-[Annotator project](http://annotatorjs.org/).
+[Annotator](http://annotatorjs.org/) project.
 
 Any discussion should happen on the
 [annotator-dev](https://lists.okfn.org/mailman/listinfo/annotator-dev) mailing
