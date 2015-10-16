@@ -51,7 +51,7 @@ This library should work with any browser implementing basic `Range` support.
 
 ### Internet Explorer version 8
 
-- Basic support can be achieved with the [rangy][rangy] shim.
+- Basic support can be achieved with the [rangy][] shim.
 - There is no support for namespaces in X(HT)ML documents (issue #17).
 
 ## Community
@@ -78,4 +78,4 @@ To run the test suite in a browser, install the karma test runner
 
 and then run `karma start` and it will print directions for debugging.
 
-[rangy] https://github.com/timdown/rangy
+  [rangy]: https://github.com/timdown/rangy "rangy"
