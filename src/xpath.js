@@ -4,9 +4,9 @@ import DOMException from './dom-exception'
 
 // https://developer.mozilla.org/en-US/docs/XPathResult
 const FIRST_ORDERED_NODE_TYPE = 9
+
 // Default namespace for XHTML documents
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
-
 
 /* Public: Compute an XPath expression for the given node.
  *
