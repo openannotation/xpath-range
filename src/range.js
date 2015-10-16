@@ -11,7 +11,7 @@ const TEXT_NODE = 3
 
 // Public interface.
 
-export function deserialize(root, startPath, startOffset, endPath, endOffset) {
+export function toRange(root, startPath, startOffset, endPath, endOffset) {
   let document = getDocument(root)
   let range = document.createRange()
 
@@ -56,7 +56,7 @@ export function deserialize(root, startPath, startOffset, endPath, endOffset) {
 }
 
 
-export function serialize(range, root, ignoreSelector) {
+export function fromRange(range, root, ignoreSelector) {
   let sc = range.startContainer
   let so = range.startOffset
   let ec = range.endContainer
