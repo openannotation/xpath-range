@@ -97,12 +97,6 @@ export function fromRange(range, root, ignoreSelector) {
 
 // Private helpers.
 
-/* Predicate for checking if a node is a TextNode. */
-function isTextNode(node) {
-  return node.nodeType === TEXT_NODE
-}
-
-
 /* Return the next Node in a document order traversal.
  * This order is equivalent to a classic pre-order.
  */
