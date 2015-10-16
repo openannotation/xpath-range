@@ -3,6 +3,34 @@ import * as xpath from './xpath'
 
 
 /**
+ * Convert a `Range` to a pair of XPath expressions and offsets.
+ *
+ * If the optional parameter `root` is supplied, the computed XPath expressions
+ * will be relative to it.
+ *
+ * @param {Range} range The Range to convert.
+ * @param {Node} [root] The root context for the XPath expressions.
+ * @returns {{start, startOffset, end, endOffset}}
+ */
+export function fromRange(range, root) {
+  let sc = range.startContainer
+  let so = range.startOffset
+  let ec = range.endContainer
+  let eo = range.endOffset
+
+  let start = xpath.fromNode(sc, root)
+  let end = xpath.fromNode(ec, root)
+
+  return {
+    start: start,
+    end: end,
+    startOffset: so,
+    endOffset: eo,
+  }
+}
+
+
+/**
  * Construct a `Range` from the given XPath expressions and offsets.
  *
  * If the optional parameter `root` is supplied, the XPath expressions are
@@ -50,34 +78,6 @@ export function toRange(startPath, startOffset, endPath, endOffset, root) {
     let message = `There is no text at the requested ${which} offset.`
     let name = 'IndexSizeError'
     return new DOMException(message, name)
-  }
-}
-
-
-/**
- * Convert a `Range` to a pair of XPath expressions and offsets.
- *
- * If the optional parameter `root` is supplied, the computed XPath expressions
- * will be relative to it.
- *
- * @param {Range} range The Range to convert.
- * @param {Node} [root] The root context for the XPath expressions.
- * @returns {{start, startOffset, end, endOffset}}
- */
-export function fromRange(range, root) {
-  let sc = range.startContainer
-  let so = range.startOffset
-  let ec = range.endContainer
-  let eo = range.endOffset
-
-  let start = xpath.fromNode(sc, root)
-  let end = xpath.fromNode(ec, root)
-
-  return {
-    start: start,
-    end: end,
-    startOffset: so,
-    endOffset: eo,
   }
 }
 
