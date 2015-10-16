@@ -29,14 +29,11 @@ export function toRange(root, startPath, startOffset, endPath, endOffset) {
 
     let last = lastLeaf(container)
     let next = (node) => node === last ? null : documentForward(node)
-    while ((container = next(container))) {
-      if (isTextNode(container)) {
-        if ((container.length == offset) || (offset < container.length)) {
-          return {container, offset}
-        } else {
-          offset -= container.length
-        }
-      }
+    while (container) {
+      let length = container.length || 0
+      if (offset <= length) return {container, offset}
+      offset -= length
+      container = next(container);
     }
 
     throw indexSize(which)

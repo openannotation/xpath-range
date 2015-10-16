@@ -25,6 +25,11 @@ describe('toRange', () => {
     assert.equal(range.toString(), 'habitant morbi')
   })
 
+  it('should correctly select text across node boundaries', () => {
+    let range = toRange(fixture.el, '/div[2]/p[1]', 0, '/div[2]/p[2]', 0)
+    assert.equal(range.toString(), 'Lorem sed do eiusmod tempor.')
+  })
+
   it('should raise NotFoundError if a node cannot be found', () => {
     let root = document.createElement('div')
     let check = () => toRange(root, '/p/strong', 13, '/p/strong', 27)
