@@ -1,6 +1,17 @@
 import * as xpath from '../../src/xpath'
 
-let suite = () => {
+describe('xpath', test_toNode);
+describe('xpath without document.evaluate', () => {
+  let evaluate = document.evaluate
+  before(() => document.evaluate = undefined)
+  after(() => document.evaluate = evaluate)
+  test_toNode()
+})
+
+test_fromNode()
+
+
+function test_fromNode() {
   beforeEach(() => fixture.load('xpath.html'))
   afterEach(() => fixture.cleanup())
 
@@ -36,22 +47,19 @@ let suite = () => {
       assert.throws(check, 'InvalidNodeTypeError')
     })
   })
-
-  describe("#toNode()", () => {
-    let path = "/p[2]/strong"
-
-    it("should parse a standard xpath string", () => {
-      let node = xpath.toNode(path, fixture.el)
-      let strong = document.getElementsByTagName('strong')[0]
-      assert.strictEqual(node, strong)
-    })
-  })
 }
 
-describe('xpath', suite);
-describe('xpath without document.evaluate', () => {
-  let evaluate = document.evaluate
-  before(() => document.evaluate = undefined)
-  after(() => document.evaluate = evaluate)
-  suite()
-})
+
+
+function test_toNode() {
+  let path = "/p[2]/strong"
+
+  beforeEach(() => fixture.load('xpath.html'))
+  afterEach(() => fixture.cleanup())
+
+  it("should parse a standard xpath string", () => {
+    let node = xpath.toNode(path, fixture.el)
+    let strong = document.getElementsByTagName('strong')[0]
+    assert.strictEqual(node, strong)
+  })
+}
