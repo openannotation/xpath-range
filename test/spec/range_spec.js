@@ -53,9 +53,9 @@ describe('fromRange', () => {
     range.setEnd(text, 27)
 
     let seri = fromRange(range, fixture.el)
-    assert.equal(seri.start, '/p[1]/strong[1]')
+    assert.equal(seri.start, '/p[1]/strong[1]/text()[1]')
     assert.equal(seri.startOffset, 13)
-    assert.equal(seri.end, '/p[1]/strong[1]')
+    assert.equal(seri.end, '/p[1]/strong[1]/text()[1]')
     assert.equal(seri.endOffset, 27)
   })
 })

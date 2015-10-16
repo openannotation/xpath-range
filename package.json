@@ -17,10 +17,7 @@
     "url": "https://github.com/openannotation/xpath-range/issues"
   },
   "homepage": "https://github.com/openannotation/xpath-range",
-  "dependencies": {
-    "ancestors": "0.0.3",
-    "matches-selector": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "assertive-chai": "^2.0.2",
     "babel": "^5.8.23",
