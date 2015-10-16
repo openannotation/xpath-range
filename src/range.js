@@ -25,7 +25,7 @@ export function toRange(root, startPath, startOffset, endPath, endOffset) {
 
   function findBoundary(path, offset, which) {
     let container = xpath.toNode(path, root)
-    if (!container) notFound(container)
+    if (!container) throw notFound(container)
 
     let last = lastLeaf(container)
     let next = (node) => node === last ? null : documentForward(node)
