@@ -50,7 +50,7 @@ export function toRange(root, startPath, startOffset, endPath, endOffset) {
 
   function indexSize(which) {
     let message = `There is no text at the requested ${which} offset.`
-    let name = "IndexSizeError"
+    let name = 'IndexSizeError'
     return new DOMException(message, name)
   }
 }
