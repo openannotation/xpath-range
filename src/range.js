@@ -5,10 +5,6 @@ import matches from 'matches-selector'
 import DOMException from './dom-exception'
 import * as xpath from './xpath'
 
-// https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-const TEXT_NODE = 3
-
-
 // Public interface.
 
 export function toRange(root, startPath, startOffset, endPath, endOffset) {
