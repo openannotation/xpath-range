@@ -8,11 +8,12 @@ const FIRST_ORDERED_NODE_TYPE = 9
 // Default namespace for XHTML documents
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
-/* Public: Compute an XPath expression for the given node.
- *
- * root - The root context of the XPath.
- *
- * Returns String
+
+/**
+ * Compute an XPath expression for the given node.
+ * @param {Node} node The node for which to compute an XPath expression.
+ * @param {Node} root The root context for the XPath expression.
+ * @returns {string}
  */
 export function fromNode(node, root = document) {
   let path = '/';
@@ -29,20 +30,15 @@ export function fromNode(node, root = document) {
 }
 
 
-/* Public: Finds an Element Node using an XPath relative to the document root.
+/**
+ * Find a node using an XPath relative to the given root node.
  *
  * If the document is served as application/xhtml+xml it will try and resolve
  * any namespaces within the XPath.
  *
- * path - An XPath String to query.
- *
- * Examples
- *
- *   node = toNode('/html/body/div/p[2]')
- *   if node
- *     # Do something with the node.
- *
- * Returns the Node if found otherwise null.
+ * @param {string} path An XPath String to evaluate.
+ * @param {Node} root The root context for the XPath expression.
+ * @returns {Node|null} The first matching Node or null if none is found.
  */
 export function toNode(path, root = document, resolver) {
   // Make the path relative to the root, if not the document.
@@ -59,26 +55,9 @@ export function toNode(path, root = document, resolver) {
 
     // Add a default prefix to each path part.
     path = path.replace(/\/(?!\.)([^\/:\(]+)(?=\/|$)/g, '/_default_:$1')
-  }
-
-  try {
-    let r = document.evaluate(path, root, resolver, FIRST_ORDERED_NODE_TYPE, null)
-    return r.singleNodeValue
-  } catch (e) {
-    // Fallback approach in case of no document.evaluate() or another error.
-    // This approach works for the simple expressions this module generates.
-    path = path.replace(/_default_:/g, '')
-    let steps = path.split("/")
-    let node = root
-    while (node) {
-      let step = steps.shift()
-      if (step === undefined) break
-      if (step === '.') continue
-      let [name, position] = step.split(/[\[\]]/)
-      position = position ? parseInt(position) : 1
-      node = findChild(node, name, position)
-    }
-    return node
+    return resolve(path, root, resolver)
+  } else {
+    return resolve(path, root, resolver)
   }
 }
 
@@ -102,6 +81,40 @@ function nodePosition(node) {
     if (node.nodeName === name) position += 1
   }
   return position
+}
+
+
+// Find a single node with XPath `path`
+function resolve(path, root, resolver) {
+  try {
+    return platformResolve(path, root, resolver);
+  } catch (err) {
+    return fallbackResolve(path, root, resolver)
+  }
+}
+
+
+// Find a single node with XPath `path` using the simple, built-in evaluator.
+function fallbackResolve(path, root, resolver) {
+  let steps = path.split("/")
+  let node = root
+  while (node) {
+    let step = steps.shift()
+    if (step === undefined) break
+    if (step === '.') continue
+    let [name, position] = step.split(/[\[\]]/)
+    name = name.replace('_default_:', '')
+    position = position ? parseInt(position) : 1
+    node = findChild(node, name, position)
+  }
+  return node
+}
+
+
+// Find a single node with XPath `path` using `document.evaluate`.
+function platformResolve(path, root, resolver) {
+  let r = document.evaluate(path, root, resolver, FIRST_ORDERED_NODE_TYPE, null)
+  return r.singleNodeValue
 }
 
 

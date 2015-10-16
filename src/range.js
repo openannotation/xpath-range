@@ -3,8 +3,16 @@ import getDocument from 'get-document'
 import DOMException from './dom-exception'
 import * as xpath from './xpath'
 
-// Public interface.
 
+/**
+ * Construct a `Range` from the given XPath expressions and offsets.
+ * @param {Node} root The root context for the XPath expressions.
+ * @param {string} startPath An XPath expression for the start container.
+ * @param {Number} startOffset The textual offset within the start container.
+ * @param {string} endPath An XPath expression for the end container.
+ * @param {Number} endOffset The textual offset within the end container.
+ * @returns Range
+ */
 export function toRange(root, startPath, startOffset, endPath, endOffset) {
   let document = getDocument(root)
   let range = document.createRange()
@@ -47,6 +55,12 @@ export function toRange(root, startPath, startOffset, endPath, endOffset) {
 }
 
 
+/**
+ * Convert a `Range` to a pair of XPath expressions and offsets.
+ * @param {Range} range The Range to convert.
+ * @param {Node} root The root context for the XPath expressions.
+ * @returns {{start, startOffset, end, endOffset}}
+ */
 export function fromRange(range, root) {
   let sc = range.startContainer
   let so = range.startOffset
@@ -65,11 +79,7 @@ export function fromRange(range, root) {
 }
 
 
-// Private helpers.
-
-/* Return the next Node in a document order traversal.
- * This order is equivalent to a classic pre-order.
- */
+// Return the next Node in a document order traversal.
 function documentForward(node) {
   if (node.firstChild) return node.firstChild
 
@@ -82,7 +92,7 @@ function documentForward(node) {
 }
 
 
-/* Find the last leaf node. */
+// Find the last leaf node.
 function lastLeaf(node) {
   while (node.hasChildNodes()) node = node.lastChild
   return node
