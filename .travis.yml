@@ -7,8 +7,8 @@ cache:
   - node_modules
 env:
   global:
-  - secure: LjqDk07qRtDzue/VzlWiRsLss/XSwNcJ9qCXaCwVWFc2UDJfWAVugJuzM2qrtHaxEdIgSgYUfFqgtJnVslBvJ/3nieaoLe4qPjy6h2lH2GE+l7UsdC1IGHWoPj6pkdu5Xgkl+Yv42epdXxThn7L/kFKlZISI7WUJm+6hMpB6KzI=
-  - secure: FoDXxc0heIq1WxiReupWbxD5XE3FZj1RK2NZ5W4obiCJN6nGthXOBBzFSflHBqEHFI3to7mtaFC7/8y5Kl++y223RmrRyR/UaA2eXFMWWgGghv6oiZNkayuit14F3TRGjaRulQzp3badH6cDY2F8G79rYeSE6ZOI5g6UeV/bi20=
+  - secure: HLVTFxP/k8fE7O9vaXOtWkATKsyzghwzaVSSm/N9FS3y3Dd9DZgwWJbaeZyvP5PZ43KY8RQVRlehrLcH8AEwq+CCC+aXjKUodhHSgiT66lw3EwujxrivaWzqUFDBB/6kxXRb2FI5f4kvUk/mSftVykydTEnYQcPGsx0c2SSuvzw=
+  - secure: FQhD5jAYqR+qZwOb69Qg6lsZvidV4fvZ2+2gYm1DECXef/Es90E6kibP5fjDEFGDo3b7vALOONBTqpTMGaNwAuWX+o8uX4VsS6skXR90NA4UOUZVo5QAq+laiAYpJ9/SaZ5gyfhy8Ajfdt8zPY3bU4YqWHBJPDy71bjypyebZdk=
   matrix:
   - BROWSER=PhantomJS npm_config_coverage=true
   - BROWSER=SL_Chrome
