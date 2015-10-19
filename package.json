@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/openannotation/xpath-range.git"
   },
-  "author": "",
+  "author": "The Annotator project contributors",
   "license": "(MIT OR GPL-3.0)",
   "bugs": {
     "url": "https://github.com/openannotation/xpath-range/issues"
