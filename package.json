@@ -1,6 +1,6 @@
 {
   "name": "xpath-range",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A (Browser) Range implementation / wrapper with XPath features, extracted from Annotator",
   "main": "index.js",
   "scripts": {
