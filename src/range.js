@@ -1,5 +1,6 @@
+import * as xpath from 'simple-xpath-position'
+
 import DOMException from './dom-exception'
-import * as xpath from './xpath'
 
 
 /**
