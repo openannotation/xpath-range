@@ -17,6 +17,10 @@
     "url": "https://github.com/openannotation/xpath-range/issues"
   },
   "homepage": "https://github.com/openannotation/xpath-range",
+  "dependencies": {
+    "dom-seek": "^2.0.0",
+    "get-document": "^1.0.0"
+  },
   "devDependencies": {
     "assertive-chai": "^2.0.2",
     "babel": "^5.8.23",
@@ -24,6 +28,7 @@
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
     "browserify-istanbul": "^0.2.1",
+    "dom-node-iterator": "^3.1.3",
     "eslint": "^1.6.0",
     "is-ie8": "^1.0.2",
     "isparta": "^3.1.0",

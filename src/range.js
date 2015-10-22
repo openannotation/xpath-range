@@ -1,6 +1,10 @@
+import getDocument from 'get-document'
+import seek from 'dom-seek'
 import * as xpath from 'simple-xpath-position'
 
 import DOMException from './dom-exception'
+
+const SHOW_TEXT = 4
 
 
 /**
@@ -45,29 +49,37 @@ export function fromRange(range, root) {
  * @returns Range
  */
 export function toRange(startPath, startOffset, endPath, endOffset, root) {
-  let start = findBoundary(startPath, startOffset, 'start')
-  let end = findBoundary(endPath, endOffset, 'end')
+  let document = getDocument(root)
+
+  let sc = xpath.toNode(startPath, root)
+  if (sc === null) throw notFound('start')
+
+  let si = document.createNodeIterator(sc, SHOW_TEXT)
+  let so = startOffset - seek(si, startOffset)
+
+  sc = si.referenceNode
+  if (!si.pointerBeforeReferenceNode) {
+    if (so > 0) throw indexSize('start')
+    so += sc.length
+  }
+
+  let ec = xpath.toNode(endPath, root)
+  if (ec === null) throw notFound('end')
+
+  let ei = document.createNodeIterator(ec, SHOW_TEXT)
+  let eo = endOffset - seek(ei, endOffset)
+
+  ec = ei.referenceNode
+  if (!ei.pointerBeforeReferenceNode) {
+    if (eo > 0) throw indexSize('end')
+    eo += ec.length
+  }
 
   let range = document.createRange()
-  range.setStart(start.container, start.offset)
-  range.setEnd(end.container, end.offset)
+  range.setStart(sc, so)
+  range.setEnd(ec, eo)
 
   return range
-
-  function findBoundary(path, offset, which) {
-    let container = xpath.toNode(path, root)
-    if (!container) throw notFound(container)
-
-    let last = lastLeaf(container)
-    let next = (node) => node === last ? null : documentForward(node)
-    while (container) {
-      let length = container.length || 0
-      if (offset <= length) return {container, offset}
-      offset -= length
-      container = next(container)
-    }
-    throw indexSize(which)
-  }
 
   function notFound(which) {
     let message = `The ${which} node was not found.`
@@ -80,24 +92,4 @@ export function toRange(startPath, startOffset, endPath, endOffset, root) {
     let name = 'IndexSizeError'
     return new DOMException(message, name)
   }
-}
-
-
-// Return the next Node in a document order traversal.
-function documentForward(node) {
-  if (node.firstChild) return node.firstChild
-
-  while (!node.nextSibling) {
-    node = node.parentNode
-    if (!node) return null
-  }
-
-  return node.nextSibling
-}
-
-
-// Find the last leaf node.
-function lastLeaf(node) {
-  while (node.hasChildNodes()) node = node.lastChild
-  return node
 }

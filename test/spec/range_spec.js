@@ -29,13 +29,27 @@ describe('toRange', () => {
     assert.equal(range.toString(), 'Lorem sed do eiusmod tempor.')
   })
 
-  it('should raise NotFoundError if a node cannot be found', () => {
-    let root = document.createElement('div')
-    let check = () => toRange('/p/strong', 13, '/p/strong', 27, root)
+  it('should correctly select the end of a text node', () => {
+    let range = toRange('/p/strong', 37, '/p/strong', 37, fixture.el)
+    assert.equal(range.toString(), '')
+  })
+
+  it('should raise NotFoundError if the start node cannot be found', () => {
+    let check = () => toRange('/q', 13, '/p/strong', 27, fixture.el)
     assert.throws(check, 'NotFoundError')
   })
 
-  it('should raise IndexSizeError if an offset is too large', () => {
+  it('should raise NotFoundError if the end node cannot be found', () => {
+    let check = () => toRange('/p/strong', 13, '/q', 27, fixture.el)
+    assert.throws(check, 'NotFoundError')
+  })
+
+  it('should raise IndexSizeError if the start offset is too large', () => {
+    let check = () => toRange('/p/strong', 47, '/p', 150, fixture.el)
+    assert.throws(check, 'IndexSizeError')
+  })
+
+  it('should raise IndexSizeError if the end offset is too large', () => {
     let check = () => toRange('/p/strong', 13, '/p/strong', 100, fixture.el)
     assert.throws(check, 'IndexSizeError')
   })
