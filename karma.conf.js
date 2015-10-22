@@ -68,11 +68,11 @@ module.exports = function(config) {
   })
 
   try {
-    var sauceCredentials = require('./sauce.json');
-    process.env.SAUCE_USERNAME = sauceCredentials.username;
-    process.env.SAUCE_ACCESS_KEY = sauceCredentials.accessKey;
+    var sauceCredentials = require('./sauce.json')
+    process.env.SAUCE_USERNAME = sauceCredentials.username
+    process.env.SAUCE_ACCESS_KEY = sauceCredentials.accessKey
   } catch (e) {
-    console.log('Note: run `git-crypt unlock` to use Sauce Labs credentials.');
+    console.log('Note: run `git-crypt unlock` to use Sauce Labs credentials.')
   }
 
   if (process.env.npm_config_coverage) config.set({
