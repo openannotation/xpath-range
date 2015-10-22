@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/openannotation/xpath-range",
   "dependencies": {
-    "dom-seek": "^2.0.0",
+    "dom-seek": "^2.1.0",
     "get-document": "^1.0.0"
   },
   "devDependencies": {
