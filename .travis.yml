@@ -18,3 +18,10 @@ env:
   - BROWSER=SL_IE_9
   - BROWSER=SL_IE_10
   - BROWSER=SL_IE_11
+notifications:
+  email: false
+  irc:
+    channels:
+    - chat.freenode.net#annotator
+    on_success: change
+    on_failure: change
