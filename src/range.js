@@ -2,8 +2,6 @@ import getDocument from 'get-document'
 import seek from 'dom-seek'
 import * as xpath from 'simple-xpath-position'
 
-import DOMException from './dom-exception'
-
 const SHOW_TEXT = 4
 
 
@@ -82,14 +80,14 @@ export function toRange(startPath, startOffset, endPath, endOffset, root) {
   return range
 
   function notFound(which) {
-    let message = `The ${which} node was not found.`
-    let name = 'NotFoundError'
-    return new DOMException(message, name)
+    let error = new Error(`The ${which} node was not found.`)
+    error.name = 'NotFoundError'
+    return error
   }
 
   function indexSize(which) {
-    let message = `There is no text at the requested ${which} offset.`
-    let name = 'IndexSizeError'
-    return new DOMException(message, name)
+    let error = new Error(`There is no text at the requested ${which} offset.`)
+    error.name = 'IndexSizeError'
+    return error
   }
 }
