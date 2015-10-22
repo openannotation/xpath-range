@@ -64,7 +64,7 @@ export function toRange(startPath, startOffset, endPath, endOffset, root) {
       let length = container.length || 0
       if (offset <= length) return {container, offset}
       offset -= length
-      container = next(container);
+      container = next(container)
     }
     throw indexSize(which)
   }
