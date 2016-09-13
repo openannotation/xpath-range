@@ -4,8 +4,8 @@
   "description": "A (Browser) Range implementation / wrapper with XPath features, extracted from Annotator",
   "main": "index.js",
   "scripts": {
-    "test": "eslint src && karma start --single-run",
-    "prepublish": "babel --source-maps inline src --out-dir lib --loose all"
+    "test": "eslint src && BABEL_ENV=test karma start --single-run",
+    "prepublish": "babel -d lib src"
   },
   "repository": {
     "type": "git",
@@ -18,34 +18,57 @@
   },
   "homepage": "https://github.com/openannotation/xpath-range",
   "dependencies": {
-    "dom-seek": "^2.1.0",
+    "dom-seek": "^4.0.1",
     "get-document": "^1.0.0",
-    "simple-xpath-position": "^1.0.0"
+    "simple-xpath-position": "^2.0.0"
   },
   "devDependencies": {
     "assertive-chai": "^2.0.2",
-    "babel": "^5.8.23",
-    "babel-eslint": "^4.1.3",
-    "babelify": "^6.3.0",
-    "browserify": "^11.2.0",
-    "browserify-istanbul": "^0.2.1",
-    "dom-node-iterator": "^3.1.3",
-    "eslint": "^1.6.0",
+    "babel-cli": "^6.14.0",
+    "babel-eslint": "^6.1.2",
+    "babel-plugin-istanbul": "^2.0.1",
+    "babel-plugin-transform-es3-member-expression-literals": "^6.8.0",
+    "babel-plugin-transform-es3-property-literals": "^6.8.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-es2015-loose": "^8.0.0",
+    "babelify": "^7.3.0",
+    "browserify": "^13.1.0",
+    "dom-node-iterator": "^3.5.0",
+    "eslint": "^3.5.0",
     "is-ie8": "^1.0.2",
-    "isparta": "^3.1.0",
-    "karma": "^0.13.10",
-    "karma-browserify": "^4.4.0",
+    "karma": "^1.3.0",
+    "karma-browserify": "^5.1.0",
     "karma-chai": "^0.1.0",
-    "karma-coverage": "^0.5.2",
+    "karma-coverage": "^1.1.1",
     "karma-coveralls": "^1.1.2",
     "karma-fixture": "^0.2.5",
-    "karma-html2js-preprocessor": "^0.1.0",
-    "karma-mocha": "^0.2.0",
-    "karma-phantomjs-launcher": "^0.2.1",
-    "karma-sauce-launcher": "^0.2.14",
-    "mocha": "^2.3.3",
-    "phantomjs": "^1.9.18",
-    "rangy": "^1.3.0"
+    "karma-html2js-preprocessor": "^1.0.0",
+    "karma-mocha": "^1.1.1",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "karma-sauce-launcher": "^1.0.0",
+    "mocha": "^3.0.2",
+    "phantomjs-prebuilt": "^2.1.12",
+    "rangy": "^1.3.0",
+    "watchify": "^3.7.0"
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "plugins": [
+          "istanbul",
+          "transform-es3-member-expression-literals",
+          "transform-es3-property-literals"
+        ]
+      }
+    },
+    "plugins": [
+      "transform-es3-member-expression-literals",
+      "transform-es3-property-literals"
+    ],
+    "presets": [
+      "es2015-loose"
+    ],
+    "sourceMaps": "inline"
   },
   "eslintConfig": {
     "env": {

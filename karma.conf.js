@@ -1,15 +1,8 @@
-var babelify = require('babelify').configure({loose: 'all'})
-var isparta = require('isparta')
-var istanbul = require('browserify-istanbul')({
-  instrumenter: isparta,
-  instrumenterConfig: {babel: {loose: 'all'}}
-})
-
 module.exports = function(config) {
   config.set({
     basePath: 'test',
     browsers: ['PhantomJS'],
-    browserify: {debug: true, transform: [babelify]},
+    browserify: {debug: true, transform: ['babelify']},
     frameworks: ['browserify', 'fixture', 'mocha'],
     files: [
       'adapter.js',
@@ -76,7 +69,7 @@ module.exports = function(config) {
   }
 
   if (process.env.npm_config_coverage) config.set({
-    browserify: {debug: true, transform: [istanbul, babelify]},
+    browserify: {debug: true, transform: ['babelify']},
     coverageReporter: {
       reporters: [
         {'type': 'lcov', 'dir': '../coverage'},
