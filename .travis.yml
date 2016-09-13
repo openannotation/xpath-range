@@ -14,12 +14,10 @@ env:
   matrix:
   - BROWSER=PhantomJS
   - BROWSER=SL_Chrome
+  - BROWSER=SL_Edge
   - BROWSER=SL_Firefox
   - BROWSER=SL_Safari
   - BROWSER=SL_IE_8
-  - BROWSER=SL_IE_9
-  - BROWSER=SL_IE_10
-  - BROWSER=SL_IE_11
 notifications:
   email: false
   irc:

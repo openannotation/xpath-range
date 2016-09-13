@@ -26,42 +26,23 @@ module.exports = function(config) {
       'SL_Chrome': {
         base: 'SauceLabs',
         browserName: 'chrome',
-        version: '41'
+      },
+      'SL_Edge': {
+        base: 'SauceLabs',
+        browserName: 'MicrosoftEdge',
       },
       'SL_Firefox': {
         base: 'SauceLabs',
         browserName: 'firefox',
-        version: '36'
       },
       'SL_Safari': {
         base: 'SauceLabs',
         browserName: 'safari',
-        platform: 'OS X 10.10',
-        version: '8'
       },
       'SL_IE_8': {
         base: 'SauceLabs',
         browserName: 'internet explorer',
-        platform: 'Windows 7',
         version: '8'
-      },
-      'SL_IE_9': {
-        base: 'SauceLabs',
-        browserName: 'internet explorer',
-        platform: 'Windows 7',
-        version: '9'
-      },
-      'SL_IE_10': {
-        base: 'SauceLabs',
-        browserName: 'internet explorer',
-        platform: 'Windows 8',
-        version: '10'
-      },
-      'SL_IE_11': {
-        base: 'SauceLabs',
-        browserName: 'internet explorer',
-        platform: 'Windows 8.1',
-        version: '11'
       }
     }
   })
