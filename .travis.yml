@@ -2,6 +2,8 @@ language: node_js
 sudo: false
 node_js:
 - stable
+after_success:
+- bash <(curl -s https://codecov.io/bash)
 cache:
   directories:
   - node_modules
@@ -10,7 +12,7 @@ env:
   - secure: HLVTFxP/k8fE7O9vaXOtWkATKsyzghwzaVSSm/N9FS3y3Dd9DZgwWJbaeZyvP5PZ43KY8RQVRlehrLcH8AEwq+CCC+aXjKUodhHSgiT66lw3EwujxrivaWzqUFDBB/6kxXRb2FI5f4kvUk/mSftVykydTEnYQcPGsx0c2SSuvzw=
   - secure: FQhD5jAYqR+qZwOb69Qg6lsZvidV4fvZ2+2gYm1DECXef/Es90E6kibP5fjDEFGDo3b7vALOONBTqpTMGaNwAuWX+o8uX4VsS6skXR90NA4UOUZVo5QAq+laiAYpJ9/SaZ5gyfhy8Ajfdt8zPY3bU4YqWHBJPDy71bjypyebZdk=
   matrix:
-  - BROWSER=PhantomJS npm_config_coverage=true
+  - BROWSER=PhantomJS
   - BROWSER=SL_Chrome
   - BROWSER=SL_Firefox
   - BROWSER=SL_Safari

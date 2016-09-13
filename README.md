@@ -1,8 +1,8 @@
 # XPath Range
 
 [![Build Status](https://travis-ci.org/openannotation/xpath-range.svg?branch=master)](https://travis-ci.org/openannotation/xpath-range)
-[![Coverage Status](https://coveralls.io/repos/openannotation/xpath-range/badge.svg?branch=master&service=github)](https://coveralls.io/github/openannotation/xpath-range?branch=master)
-[![npm](https://img.shields.io/npm/v/xpath-range.svg)](https://www.npmjs.com/package/xpath-range)
+[![NPM Package](https://img.shields.io/npm/v/xpath-range.svg)](https://www.npmjs.com/package/xpath-range)
+[![Coverage](https://img.shields.io/codecov/c/github/openannotation/xpath-range/master.svg)](https://codecov.io/gh/openannotation/xpath-range)
 
 This module is for describing and resolving a DOM `Range` using XPath.
 

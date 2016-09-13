@@ -11,7 +11,15 @@ module.exports = function(config) {
       'test/*.js': ['browserify'],
       'test/fixtures/*.html': ['html2js']
     },
-    reporters: ['progress', 'saucelabs'],
+    reporters: ['progress', 'coverage', 'saucelabs'],
+    coverageReporter: {
+      reporters: [
+        {type: 'html', subdir: '.'},
+        {type: 'json', subdir: '.'},
+        {type: 'lcovonly', subdir: '.'},
+        {type: 'text', subdir: '.'}
+      ]
+    },
     sauceLabs: {testName: 'XPath Range test'},
 
     customLaunchers: {
@@ -65,17 +73,6 @@ module.exports = function(config) {
   } catch (e) {
     console.log('Note: run `git-crypt unlock` to use Sauce Labs credentials.')
   }
-
-  if (process.env.npm_config_coverage) config.set({
-    browserify: {debug: true, transform: ['babelify']},
-    coverageReporter: {
-      reporters: [
-        {'type': 'lcov', 'dir': '../coverage'},
-        {'type': 'text'}
-      ]
-    },
-    reporters: ['progress', 'saucelabs', 'coverage', 'coveralls']
-  })
 
   if (process.env.TRAVIS) config.set({
     browsers: [process.env.BROWSER]
