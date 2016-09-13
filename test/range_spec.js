@@ -1,4 +1,4 @@
-import {fromRange, toRange} from '../../src/range'
+import {fromRange, toRange} from '../src/range'
 
 describe('toRange', () => {
   beforeEach(() => fixture.load('range.html'))

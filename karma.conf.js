@@ -1,17 +1,15 @@
 module.exports = function(config) {
   config.set({
-    basePath: 'test',
     browsers: ['PhantomJS'],
     browserify: {debug: true, transform: ['babelify']},
     frameworks: ['browserify', 'fixture', 'mocha'],
     files: [
-      'adapter.js',
-      'spec/fixtures/*.html',
-      'spec/*.js'
+      'test/*.js',
+      'test/fixtures/*.html'
     ],
     preprocessors: {
-      '**/*.js': ['browserify'],
-      '**/*.html': ['html2js']
+      'test/*.js': ['browserify'],
+      'test/fixtures/*.html': ['html2js']
     },
     reporters: ['progress', 'saucelabs'],
     sauceLabs: {testName: 'XPath Range test'},
