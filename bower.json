@@ -1,0 +1,13 @@
+{
+  "name": "xpath-range",
+  "main": "src/range.js",
+  "license": "MIT",
+  "ignore": [
+    "package.json"
+  ],
+  "keywords": [
+    "xpath",
+    "range",
+    "browser"
+  ]
+}
